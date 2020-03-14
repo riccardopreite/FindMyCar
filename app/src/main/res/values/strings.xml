@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Map try</string>
+    <string name="title_activity_maps">Map</string>
+    <string-array name="planets_array">
+        <item>Ristoranti</item>
+        <item>Sport</item>
+        <item>Svago</item>
+        <item>Macchina</item>
+    </string-array>
+
+    <string name="name">Nome:</string>
+    <string name="address">Indirizzo:</string>
+    <string name="login">Login</string>
+    <string name="cancel">Cancel</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="pubblico">Pubblico</string>
+    <string name="travelling">Travelling</string>
+    <string name="privato">Privato</string>
+    <string name="custom_btn">Aggiungi POI</string>
+    <string name="nome">Nome</string>
+    <string name="tipo">Tipo:</string>
+    <string name="gender">Gender</string>
+    <string name="reading">Reading</string>
+    <string name="sports">Sports</string>
+    <string name="header">Scegli le caratteristiche del punto che vuoi aggiungere</string>
+    <string name="spinner_name">Contenuto:</string>
+    <string name="info">Info</string>
+    <string name="help">help</string>
+</resources>
