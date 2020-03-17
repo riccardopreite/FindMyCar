@@ -4,15 +4,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.Dialog
-import android.app.PendingIntent.getActivity
-import android.content.ClipData
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -23,46 +18,33 @@ import android.view.*
 import android.widget.*
 
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.Fragment
-import co.metalab.asyncawait.async
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.ui.AppBarConfiguration
 import com.example.maptry.R.id
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException
-import com.google.android.gms.common.GooglePlayServicesRepairableException
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places;
 import com.google.android.gms.location.*
-import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.gms.maps.*
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.Tasks.await
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.android.synthetic.main.activity_maps.*
-import kotlinx.android.synthetic.main.cutsom_dialog.view.*
-import kotlinx.android.synthetic.main.dialog_custom_view.*
-import kotlinx.android.synthetic.main.marker_info_window.*
 import org.json.JSONObject
 
-import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
-import java.util.*
+import com.google.android.material.navigation.NavigationView
+import kotlinx.android.synthetic.main.activity_maps.*
 import java.util.Arrays.*
 
 @Suppress("DEPRECATION")
 class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
+    GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, DrawerLayout.DrawerListener,NavigationView.OnNavigationItemSelectedListener{
 
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -72,6 +54,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     // 2
     private lateinit var locationRequest: LocationRequest
 
+    private lateinit var appBarConfiguration: AppBarConfiguration
+
+    private var opened : Boolean = false
 
     private val myList = JSONObject() // marker
     private val dict = JSONObject() //nome
@@ -82,17 +67,22 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     private var zoom = 1
     private lateinit var alertDialog: AlertDialog
 
-    @SuppressLint("ResourceType")
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.menu, menu)
-        return true
-    }
-    @SuppressLint("ResourceType")
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-        return true
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        Log.d("ITEM",item.itemId.toString())
+//        if(item.itemId.toString() == "list"){
+//            Toast.makeText(applicationContext, "List da implementare", Toast.LENGTH_LONG).show()
+//        }
+//        else  if(item.itemId.toString() == "signout"){
+//            Toast.makeText(applicationContext, "signout da implementare", Toast.LENGTH_LONG).show()
+//        }
+//        else  if(item.itemId.toString() == "help"){
+//            Toast.makeText(applicationContext, "help da implementare", Toast.LENGTH_LONG).show()
+//        }
+//
+//        return true
+//
+//    }
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
@@ -104,9 +94,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     private fun setUpMap() {
         Places.initialize(applicationContext, getString(R.string.google_maps_key))
         if (ActivityCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             return
         }
 
@@ -148,10 +138,14 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_maps)
+        drawer_layout.visibility = View.GONE;
+
+        val actionBar = supportActionBar
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
-                .findFragmentById(id.map) as SupportMapFragment
+            .findFragmentById(id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
@@ -187,25 +181,74 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
 
         createLocationRequest()
+
+
+//       Log.d("PORCOPDIOOOO2","inizio")
+
+//        setContentView(R.layout.activity_navigation)
+//        val toolbar: Toolbar = findViewById(R.id.toolbar)
+//        setSupportActionBar(toolbar)
+//
+//
+//        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+//        val navView: NavigationView = findViewById(R.id.nav_view)
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        // Passing each menu ID as a set of Ids because each
+//        // menu should be considered as top level destinations.
+//        appBarConfiguration = AppBarConfiguration(
+//            setOf(
+//                id.nav_home, id.nav_gallery, id.nav_slideshow
+//            ), drawerLayout
+//        )
+//        Log.d("PORCOPDIOOOO3","fine")
+//        setupActionBarWithNavController(navController, appBarConfiguration)
+//        navView.setupWithNavController(navController)
+
     }
 
+    @SuppressLint("ResourceType")
     fun setUpSearch() {
-
+        Log.d("PORCOPDIOOOO","prima")
+        setUpMenu()
         val autoCompleteFragment =
-            supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as? AutocompleteSupportFragment
+            supportFragmentManager.findFragmentById(id.autocomplete_fragment) as? AutocompleteSupportFragment
         autoCompleteFragment?.setCountry("IT")
         autoCompleteFragment?.setPlaceFields(asList(Place.Field.ID,
             Place.Field.NAME,Place.Field.LAT_LNG,Place.Field.ADDRESS))
 
+        val layout : LinearLayout = autoCompleteFragment?.getView() as LinearLayout
+
+        val searchIcon =  layout.getChildAt(0) as ImageView
+
+        searchIcon?.setImageDrawable(getResources().getDrawable(R.drawable.ic_menu))
+//        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
+
+        val navMenu: NavigationView = findViewById(R.id.nav_view)
+        navMenu.setNavigationItemSelectedListener(this)
+//        drawerLayout.addDrawerListener(this)
+//        drawerLayout.setScrimColor(Color.TRANSPARENT)
+//        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        searchIcon.setOnClickListener(View.OnClickListener() {
+
+
+            Log.d("tag","prin")
+            val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
+            val p: NavigationView = findViewById(R.id.nav_view)
+//            drawerLayout.openDrawer(GravityCompat.START,true);
+            drawerLayout.visibility  = View.VISIBLE
+            drawerLayout.bringToFront()
+            Log.d("tag","cliccato")
+
+        });
         autoCompleteFragment?.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 println( place)
-                if(place != null){
-                    var lat = place.latLng
-                    if (lat != null) {
-                        getSupportFragmentManager().popBackStack();
-                        onMapClick(lat)
-                    }
+                var lat = place.latLng
+                if (lat != null) {
+                    autoCompleteFragment.setText("")
+                    getSupportFragmentManager().popBackStack();
+                    onMapClick(lat)
                 }
             }
 
@@ -225,13 +268,29 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        mMap.getUiSettings().setZoomControlsEnabled(true)
         mMap.setOnMarkerClickListener(this)
 
         mMap.setOnMapClickListener(this)
+        var mapFragment =  supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        var locationButton : View?
+        var ll : LinearLayout
+            locationButton = mapFragment.view?.findViewById<LinearLayout>(Integer.parseInt("1"))
+        var prov : View? = (locationButton?.getParent()) as View
+        locationButton = prov?.findViewById(Integer.parseInt("2"));
+        // Change the visibility of my location button
+        println("PORCODIOOOOOOOOOO")
+        println(locationButton?.visibility)
+        var layoutParams =
+        locationButton?.getLayoutParams() as RelativeLayout.LayoutParams
+        // position on right bottom
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        layoutParams.setMargins(0, 0, 30, 30);
         setUpMap()
         setUpSearch()
     }
@@ -255,9 +314,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         var text = "Indirizzo:" + list?.get(0)?.getAddressLine(0)+"\nCitta:" +  list?.get(0)?.getLocality() + "\nRegione: " + list?.get(0)?.getAdminArea() + "\nStato: " + list?.get(0)?.getCountryName()+ "\nCAP: " + list?.get(0)?.getPostalCode()
         if(p0.position == x) builder.setMessage("Sei Qui")
         else builder.setMessage(dict.getString(p0.position.toString())
-                                +"\n"+addr.getString(p0.position.toString())
-                                +"\n"+content.getString(p0.position.toString())
-                                +"\n"+publicPrivate.getString(p0.position.toString()))
+                +"\n"+addr.getString(p0.position.toString())
+                +"\n"+content.getString(p0.position.toString())
+                +"\n"+publicPrivate.getString(p0.position.toString()))
 
 
         builder.setPositiveButton("Close") { dialog, which ->
@@ -279,7 +338,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 .alpha(0.7f)
         )
 
-            myList.put(p0.toString(),x)
+        myList.put(p0.toString(),x)
 
 
 
@@ -302,9 +361,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         spinner.onItemSelectedListener = SpinnerActivity()
 
 
-            address.isEnabled = false
-            var txt = getAddress(p0)
-            address.setText(txt?.get(0)?.getAddressLine(0))
+        address.isEnabled = false
+        var txt = getAddress(p0)
+        address.setText(txt?.get(0)?.getAddressLine(0))
 
         ArrayAdapter.createFromResource(
             this,
@@ -321,19 +380,19 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             var text = ""
             var gender = "gen"
             createMarker(p0)
-                if(publicButton.isChecked)
-                    gender = publicButton.text.toString()
-                if (privateButton.isChecked)
-                    gender = privateButton.text.toString()
+            if(publicButton.isChecked)
+                gender = publicButton.text.toString()
+            if (privateButton.isChecked)
+                gender = privateButton.text.toString()
 
 
 
-                text  = lname.text.toString()
-                dict.put(p0.toString(),text)
-                addr.put(p0.toString(),address.text.toString())
-                content.put(p0.toString(),spinner.getSelectedItem().toString())
-                publicPrivate.put(p0.toString(),gender)
-                alertDialog.dismiss()
+            text  = lname.text.toString()
+            dict.put(p0.toString(),text)
+            addr.put(p0.toString(),address.text.toString())
+            content.put(p0.toString(),spinner.getSelectedItem().toString())
+            publicPrivate.put(p0.toString(),gender)
+            alertDialog.dismiss()
 
         }
 
@@ -354,10 +413,10 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     private fun startLocationUpdates() {
         //1
         if (ActivityCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE)
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE)
             return
         }
         //2
@@ -374,7 +433,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         val builder = LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest)
+            .addLocationRequest(locationRequest)
 
         // 4
         val client = LocationServices.getSettingsClient(this)
@@ -394,7 +453,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
                     e.startResolutionForResult(this@MapsActivity,
-                            REQUEST_CHECK_SETTINGS)
+                        REQUEST_CHECK_SETTINGS)
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignore the error.
                 }
@@ -438,5 +497,91 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    public fun setUpMenu(){
+
+    }
+
+    override fun onBackPressed() {
+//        if (drawer_layout.isDrawerOpen(Gravity.LEFT)) {
+//            Log.d("1","1")
+//            drawer_layout.closeDrawer(Gravity.LEFT,true)
+//
+//        } else {
+            Log.d("12","12")
+
+            super.onBackPressed()
+//        }
+    }
+
+
+    @SuppressLint("ResourceType")
+    override fun onDrawerStateChanged(newState: Int) {
+//        Log.d("pd","pd")
+//        if(!opened){
+//            if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+//                Log.d("bol","true")
+//
+//                drawer_layout.closeDrawer(GravityCompat.START)
+//                val drawerLayout: FrameLayout = findViewById(R.id.fisrtframe)
+//                drawerLayout.bringToFront()
+//                opened = false
+//            }
+//        }
+//        else {
+//            Log.d("bol","false")
+//
+//            opened = true
+//        }
+
+    }
+
+    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+
+    }
+
+    @SuppressLint("ResourceType")
+    override fun onDrawerClosed(drawerView: View) {
+//        setContentView(R.layout.activity_maps)
+//        val view : RelativeLayout = findViewById(R.layout.activity_maps)
+//        view.bringToFront()
+//        val drawerLayout: FrameLayout = findViewById(R.id.homeframe)
+//
+//        drawerLayout.bringToFront()
+        Log.d("chiuso","chiuso")
+    }
+
+    override fun onDrawerOpened(drawerView: View) {
+        Log.d("aper","aper")
+    }
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+//    }
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.list -> {
+                Toast.makeText(applicationContext, "List da implementare", Toast.LENGTH_LONG).show()
+                true
+            }
+            R.id.signout ->{
+                Toast.makeText(applicationContext, "signout da implementare", Toast.LENGTH_LONG).show()
+                return true
+            }
+            R.id.help ->{
+                Toast.makeText(applicationContext, "help da implementare", Toast.LENGTH_LONG).show()
+                return true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    fun closeDrawer(view: View) {
+//        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        val view : FrameLayout = findViewById(R.id.homeframe)
+//        drawer_layout.closeDrawer(GravityCompat.START,true)
+
+        view.bringToFront()
+    }
 }
+
 
