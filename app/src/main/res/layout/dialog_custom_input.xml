@@ -15,10 +15,11 @@
             android:id="@+id/content"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/headerattr"
+                android:id="@+id/header"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:ellipsize="end"
@@ -33,97 +34,140 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:background="@drawable/bottom_border">
-
-
+                android:id="@+id/rl_lname"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
 
                 <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nome"
+                    android:id="@+id/lbl_lname"
+                    android:textColor="#000000"
+                    android:layout_centerVertical="true"
+                    />
+
+                <EditText
+                    android:id="@+id/txt_lname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/txt_addressattr"
-                    android:textColor="#000000"
-                    android:text="@string/address"
-                    />
+                    android:layout_toEndOf="@+id/lbl_lname"
+                    android:backgroundTint="#000000"
+                    android:textCursorDrawable="@drawable/color_cursor"
+                    android:inputType="text"
+                    android:singleLine="false"
+                    android:autofillHints="" />
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:background="@drawable/bottom_border">
+                android:id="@+id/address"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:text="@string/address"
+                    android:id="@+id/lbl_address"
+                    android:layout_centerVertical="true"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txt_address"
+                    android:layout_toEndOf="@+id/lbl_address"
+                    />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
                 <TextView
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
 
                     android:textColor="#000000"
                     android:text="@string/spinner_name"
-                    android:id="@+id/spinner_content"
+                    android:id="@+id/spinner_name"
                     android:layout_centerVertical="true"
 
                     />
-                <TextView
-                    android:layout_width="150dp"
+                <Spinner
+                    android:id="@+id/planets_spinner"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
-                    android:text="@string/spinner_name"
-                    android:id="@+id/contentattr"
-                    android:layout_toEndOf="@+id/spinner_content"
-                    android:layout_centerVertical="true"
-                    />
+                    android:layout_toEndOf="@+id/spinner_name"/>
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/rl_gender"
-                android:padding="16dp"
-                android:background="@drawable/bottom_border">
+                android:layout_marginTop="10dp">
 
                 <TextView
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:text="@string/tipo"
                     android:textColor="#000000"
-                    android:id="@+id/lbl_genderattr"
+                    android:id="@+id/lbl_gender"
                     android:layout_centerVertical="true"
                     />
-                <TextView
-                    android:layout_width="150dp"
+                <RadioGroup
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/tipo"
-                    android:textColor="#000000"
-                    android:id="@+id/genderattr"
-                    android:layout_toEndOf="@+id/lbl_genderattr"
-                    android:layout_centerVertical="true"
-                    />
+                    android:id="@+id/rg_gender"
+                    android:layout_toEndOf="@+id/lbl_gender">
+
+                    <RadioButton
+                        android:id="@+id/rb_public"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="#2196F3"
+                        android:layout_gravity="start"
+                        android:checked="true"
+                        android:text="@string/pubblico"
+                        />
+
+                    <RadioButton
+                        android:id="@+id/rb_private"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:checked="false"
+                        android:text="@string/privato"
+                        />
+                </RadioGroup>
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/routelayout"
-                android:layout_marginTop="32dp">
+                android:id="@+id/buttonlayout"
+                android:layout_marginTop="16dp">
 
                 <Button
-                    android:id="@+id/removeBtnattr"
+                    android:id="@+id/removeBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="34dp"
+                    android:layout_marginEnd="16dp"
                     android:background="@color/colorBackground"
-                    android:text="@string/cancel"
-                    />
+                    android:text="@string/cancel" />
 
                 <Button
-                    android:id="@+id/routeBtn"
+                    android:id="@+id/addBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignEnd="@+id/removeBtn"
                     android:layout_alignParentEnd="true"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="34dp"
                     android:background="#2196F3"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"
-                    android:text="@string/route"
-                    android:layout_alignEnd="@+id/removeBtnattr"/>
+                    android:text="@string/add" />
             </RelativeLayout>
         </LinearLayout>
 
