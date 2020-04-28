@@ -64,6 +64,8 @@ class LoginActivity : AppCompatActivity() {
     /*Start SignIn Function*/
     fun signIn() {
         var signInIntent : Intent = mGoogleSignInClient.signInIntent;
+        println("IN SIGNINNNNNN")
+        println(signInIntent)
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 

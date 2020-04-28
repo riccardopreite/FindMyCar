@@ -13,6 +13,11 @@
             android:title="@string/list"
             app:showAsAction="never"/>
         <item
+            android:id="@+id/friend"
+            android:icon="@drawable/ic_friend_black"
+            android:title="@string/friend"
+            app:showAsAction="never"/>
+        <item
         android:id="@+id/help"
         android:icon="@drawable/ic_help"
         android:title="@string/help"/>

@@ -9,6 +9,9 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,6 +19,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -49,6 +53,19 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+        <activity
+        android:name=".ServerActivity"
+        android:label="Server"
+        android:theme="@style/AppTheme.NoActionBar"
+        >
+        <intent-filter tools:ignore="AppLinkUrlError">
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.BROWSABLE" />
+        </intent-filter>
+    </activity>
+
+        <receiver android:name=".AcceptFriend   "/>
     </application>
 
 </manifest>

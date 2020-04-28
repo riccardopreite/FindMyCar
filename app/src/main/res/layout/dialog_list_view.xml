@@ -12,6 +12,7 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:layout_marginTop="10dp"
+            android:padding="5dp"
             android:orientation="vertical">
 
             <TextView
@@ -48,6 +49,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/txt_lname"
                     android:backgroundTint="#000000"
+                    android:textCursorDrawable="@drawable/color_cursor"
                     android:drawableTint="@color/colorBackground"
                     android:layout_toEndOf="@+id/lbl_lname"
                     android:autofillHints=""
@@ -114,7 +116,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/rg_gender"
-                    android:layout_toEndOf="@+id/lbl_gender">
+                    android:layout_toEndOf="@+id/lbl_gender"
+                    android:orientation="horizontal"
+                    >
 
                     <RadioButton
                         android:id="@+id/rb_public"
@@ -137,30 +141,35 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/buttonlayout">
+                android:id="@+id/buttonlayout"
+                android:layout_marginTop="32dp">
 
                 <Button
                     android:id="@+id/removeBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
+                    android:layout_width="138dp"
+                    android:layout_height="34dp"
                     android:layout_gravity="start"
-                    android:layout_marginStart="34dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@color/colorBackground"
-                    android:text="@string/cancel" />
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/layout_padding"
+                    android:drawableStart="@drawable/ic_close_blu"
+                    android:text="@string/cancel"
+                     />
 
                 <Button
                     android:id="@+id/addBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
+                    android:layout_width="138dp"
+                    android:layout_height="34dp"
                     android:layout_alignEnd="@+id/removeBtn"
                     android:layout_alignParentEnd="true"
-                    android:layout_gravity="end"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="34dp"
-                    android:background="#2196F3"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/layout_paddingroute"
+                    android:drawableStart="@drawable/ic_add"
                     android:text="@string/add" />
             </RelativeLayout>
+
+
+
         </LinearLayout>
 
     </ScrollView>
