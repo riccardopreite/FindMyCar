@@ -127,9 +127,10 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 val homeLayout: FrameLayout = findViewById(R.id.homeframe)
                 val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
                 val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
+                val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
                 splashLayout.invalidate()
                 splashLayout.visibility = View.GONE
-                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout)
+                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout)
                 mainHandler.removeCallbacksAndMessages(null);
             }
             else mainHandler.postDelayed(this, 1500)
@@ -236,6 +237,12 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             }
         }
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        println("STOPPPPPP")
+//        startService(Intent(this, NotificationService::class.java))
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -357,7 +364,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
-
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
 
         if (homeLayout.visibility == View.GONE) {
             routebutton.text = "Visualizza"
@@ -370,7 +377,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         ), 20F
                     )
                 )
-                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout)
+                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout)
                 alertDialog.dismiss()
             }
         }
@@ -665,7 +672,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                     val listLayout: FrameLayout = findViewById(R.id.list_layout)
                     val homeLayout: FrameLayout = findViewById(R.id.homeframe)
                     val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
-                    switchFrame(drawerLayout, listLayout, homeLayout,friendLayout)
+                    val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+                    switchFrame(drawerLayout, listLayout, homeLayout,friendLayout,friendRequestLayout)
                 })
                 user.visibility = View.VISIBLE
                 user.text = account?.displayName
@@ -861,7 +869,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
-        switchFrame(homeLayout,listLayout,drawerLayout,friendLayout)
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout)
     }
 
     @SuppressLint("WrongViewCast")
@@ -874,7 +883,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
-        switchFrame(listLayout,homeLayout,drawerLayout,friendLayout)
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        switchFrame(listLayout,homeLayout,drawerLayout,friendLayout,friendRequestLayout)
 
 
         var  lv:ListView = findViewById<ListView>(R.id.lv)
@@ -961,7 +971,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 }
 
             }
-
             val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(this)
             dialogBuilder.setOnDismissListener(object : DialogInterface.OnDismissListener {
                 override fun onDismiss(arg0: DialogInterface) { }
@@ -985,14 +994,18 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
-    private fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout,toGone3: FrameLayout){
+    private fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout,toGone3: FrameLayout,toGone4:FrameLayout){
         toGone1.invalidate()
         toGone2.invalidate()
         toGone3.invalidate()
+        toGone4.invalidate()
+
         toView.visibility = View.VISIBLE
         toGone1.visibility = View.GONE
         toGone2.visibility = View.GONE
         toGone3.visibility = View.GONE
+        toGone4.visibility = View.GONE
+
         toView.startAnimation(mAnimation);
         mAnimation.start();
         toView.bringToFront()
@@ -1006,7 +1019,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
-        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout)
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout)
 
 
         var  lv:ListView = findViewById<ListView>(R.id.fv)
@@ -1025,6 +1039,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     }
 
     fun addFriend(view: View) {
+
         val inflater: LayoutInflater = this.layoutInflater
         val dialogView: View = inflater.inflate(R.layout.add_friend, null)
         val emailText : EditText = dialogView.findViewById(R.id.friendEmail)
@@ -1065,7 +1080,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     /*End Utils Function*/
     /*Start Notification Function*/
     private fun scheduleRepeatingTasks() {
-
         /*Setting up different constraints on the work request.
          */
         val constraints = Constraints.Builder().apply {

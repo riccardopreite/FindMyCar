@@ -16,9 +16,13 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import org.json.JSONObject
+import java.lang.Math.abs
 
 class NotificationRequestWorker(private val context: Context, workerParameters: WorkerParameters) :
     Worker(context, workerParameters) {
+    companion object{
+        var jsonNotifId = JSONObject()
+    }
     var notificationJson = JSONObject()
 //    val postListener = object : ValueEventListener {
 //        override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -50,12 +54,12 @@ class NotificationRequestWorker(private val context: Context, workerParameters: 
 //        }
 //    }
     override fun doWork(): Result {
-
-    var id = account?.email?.replace("@gmail.com","")
-    if (id != null) {
+    println("DO WORK")
+    var idDB = account?.email?.replace("@gmail.com","")
+    if (idDB != null) {
         println("ID NON NULL IN NOTIFICATION")
         //Listner for live marker
-        db.collection("user").document(id).collection("live")
+        db.collection("user").document(idDB).collection("live")
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
 
                 if (firebaseFirestoreException != null) {
@@ -76,7 +80,7 @@ class NotificationRequestWorker(private val context: Context, workerParameters: 
                             println(chi.value)
                             notificationJson.put(chi.key, chi.value)
                         }
-                        db.collection("user").document(id).collection("live").document(child.id).delete()
+                        db.collection("user").document(idDB).collection("live").document(child.id).delete()
 
                         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         val notification = NotificationCompat.Builder(context, "first").apply {
@@ -93,7 +97,7 @@ class NotificationRequestWorker(private val context: Context, workerParameters: 
                 }
             }
         //Listner for friend Request
-        db.collection("user").document(id).collection("friendrequest")
+        db.collection("user").document(idDB).collection("friendrequest")
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
 
                 if (firebaseFirestoreException != null) {
@@ -113,24 +117,45 @@ class NotificationRequestWorker(private val context: Context, workerParameters: 
                             println(chi.value)
                             notificationJson.put(chi.key, chi.value)
                         }
-                        db.collection("user").document(id).collection("friendrequest").document(child.id).delete()
+                        var notificationId = abs(System.nanoTime().toInt())
+
+                        println("NOTIFICATION IDDDDDD")
+                        println(notificationId.toString())
+                        db.collection("user").document(idDB).collection("friendrequest").document(child.id).delete()
                         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        jsonNotifId.put(notificationJson.getString("origin"), notificationId)
                         val notification = NotificationCompat.Builder(context, "first").apply {
                             setContentTitle("Richiesta d'amicizia")
                             setContentText(notificationJson.getString("origin") + ": Ti ha inviato una richiesta di amicizia!")
-                            setSmallIcon(R.drawable.ic_launcher_foreground)
-                            priority = NotificationCompat.PRIORITY_DEFAULT
-                            val acceptFriendIntent : Intent=  Intent(context,AcceptFriend::class.java)
-                            acceptFriendIntent.putExtra("sender", notificationJson.getString("origin"));
-                            acceptFriendIntent.putExtra("receiver", id);
-                            val declineFriendIntent : Intent=  Intent(context,DeclineFriend::class.java)
-                            val acceptPendingIntent = PendingIntent.getBroadcast(context,0,acceptFriendIntent,0)
-                            val declinePendingIntent = PendingIntent.getBroadcast(context,0,declineFriendIntent,0)
-                            addAction(R.drawable.ic_addfriendnotification, "Accetta", acceptPendingIntent )
-                            addAction(R.drawable.ic_closenotification, "Rifiuta", declinePendingIntent )
-                        }.build()
 
-                        nm.notify(System.currentTimeMillis().toInt(), notification)
+                            setSmallIcon(R.drawable.ic_launcher_foreground)
+                            setAutoCancel(true) //collegato a tap notification
+                            val notificationClickIntent : Intent=  Intent(context,ShowFriendRequest::class.java)
+                            notificationClickIntent.putExtra("sender", notificationJson.getString("origin"))
+                            notificationClickIntent.putExtra("receiver", idDB)
+                            setContentIntent(PendingIntent.getActivity(context, 0,  notificationClickIntent, 0));
+                            priority = NotificationCompat.PRIORITY_DEFAULT
+
+                            val acceptFriendIntent : Intent=  Intent(context,AcceptFriend::class.java)
+                            acceptFriendIntent.putExtra("sender", notificationJson.getString("origin"))
+                            acceptFriendIntent.putExtra("receiver", idDB);
+
+
+
+
+
+
+                            val acceptPendingIntent = PendingIntent.getBroadcast(context,0,acceptFriendIntent,0)
+
+                            addAction(R.drawable.ic_addfriendnotification, "Accetta", acceptPendingIntent )
+
+                            val declineFriendIntent : Intent=  Intent(context,DeclineFriend::class.java)
+                            declineFriendIntent.putExtra("sender", notificationJson.getString("origin"))
+                            val declinePendingIntent = PendingIntent.getBroadcast(context,999,declineFriendIntent,PendingIntent.FLAG_ONE_SHOT)
+                            addAction(R.drawable.ic_closenotification, "Rifiuta", declinePendingIntent )
+
+                        }.build()
+                        nm.notify(notificationId, notification)
                         querySnapshot.documents.remove(child)
                     }
                 }

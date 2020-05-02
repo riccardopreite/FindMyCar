@@ -73,4 +73,7 @@
     <string name="cancel">Annulla</string>
     <string name="friend">Amici</string>
     <string name="addfriend">Aggiungi amico</string>
+    <string name="addFriend">Accetta</string>
+    <string name="delete">Rifiuta</string>
+    <string name="friendheader">Nuova richiesta di amicizia</string>
 </resources>

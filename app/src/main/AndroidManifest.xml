@@ -20,6 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name="org.eclipse.paho.android.service.MqttService" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -54,6 +55,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ShowFriendRequest"
+            android:label="friendRequest"
+            android:theme="@style/AppTheme.NoActionBar"
+            >
+            <intent-filter tools:ignore="AppLinkUrlError">
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+        <activity
         android:name=".ServerActivity"
         android:label="Server"
         android:theme="@style/AppTheme.NoActionBar"
@@ -65,7 +77,8 @@
         </intent-filter>
     </activity>
 
-        <receiver android:name=".AcceptFriend   "/>
+        <receiver android:name=".AcceptFriend"/>
+        <receiver android:name=".DeclineFriend"/>
     </application>
 
 </manifest>
