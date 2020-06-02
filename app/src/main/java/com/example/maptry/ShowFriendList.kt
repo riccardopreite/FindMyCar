@@ -14,7 +14,7 @@ import java.net.URLEncoder
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
-class ShowFriendRequest : AppCompatActivity() {
+class ShowFriendList : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,35 +31,18 @@ class ShowFriendRequest : AppCompatActivity() {
         listLayout.invalidate()
         homeLayout.invalidate()
         splashLayout.invalidate()
-        listFriendLayout.invalidate()
+        friendLayout.invalidate()
 
         drawerLayout.visibility = View.GONE
         listLayout.visibility = View.GONE
         homeLayout.visibility = View.GONE
         splashLayout.visibility = View.GONE
-        listFriendLayout.visibility = View.GONE
+        friendLayout.visibility = View.GONE
 
-        friendLayout.bringToFront()
-        friendLayout.visibility = View.VISIBLE
-        var extras = intent?.extras
-        var sender = extras?.get("sender") as String
-        var receiver = extras?.get("receiver") as String
-        println("SENDER IN ON CLICK")
-        println(sender)
-        var buttonAccept:Button = findViewById(R.id.acceptFriendRequest)
-        var friendTextView:TextView = findViewById(R.id.friendRequestText)
-        friendTextView.text = sender + " ti ha inviato una richiesta di amicizia!"
-        var buttonDecline:Button = findViewById(R.id.cancelFriendRequest)
-        buttonAccept.setOnClickListener {
-            confirmFriend(sender,receiver)
-            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout)
-            finish()
-        }
-        buttonDecline.setOnClickListener {
-            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout)
-            finish()
-        }
-
+        listFriendLayout.bringToFront()
+        listFriendLayout.visibility = View.VISIBLE
+        finish()
     }
 
+    fun closeDrawerCar(view: View) {}
 }

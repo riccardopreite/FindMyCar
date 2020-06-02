@@ -1,11 +1,16 @@
 package com.example.maptry
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings.Global.getString
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.maptry.MapsActivity.Companion.account
@@ -24,35 +29,7 @@ class NotificationRequestWorker(private val context: Context, workerParameters: 
         var jsonNotifId = JSONObject()
     }
     var notificationJson = JSONObject()
-//    val postListener = object : ValueEventListener {
-//        override fun onDataChange(dataSnapshot: DataSnapshot) {
-//
-//            MapsActivity.dataFromfirebase = dataSnapshot
-//            if(dataSnapshot.hasChildren()) {
-//                dataSnapshot.children.forEach { child ->
-////                    myjson = JSONObject()
-//                    child.children.forEach { chi ->
-//                        println(chi.key)
-//                        println(chi.value)
-////                        myjson.put(chi.key,chi.value)
-//                    }
-////                    var pos : LatLng = LatLng(myjson.getString("lat").toDouble(),myjson.getString("lon").toDouble())
-////                    println("CREATEEEEEEEE")
-////                    println(pos)
-////                    var mark = createMarker(pos)
-////                    mymarker.put(pos.toString(),mark)
-////                    myList.put(pos.toString(),myjson)
-//                }
-//            }
-//
-//        }
-//
-//        override fun onCancelled(databaseError: DatabaseError) {
-//            // Getting Post failed, log a message
-//            Log.w("ON CANCELLED", "loadPost:onCancelled", databaseError.toException())
-//            // ...
-//        }
-//    }
+
     override fun doWork(): Result {
     println("DO WORK")
     var idDB = account?.email?.replace("@gmail.com","")
@@ -117,45 +94,91 @@ class NotificationRequestWorker(private val context: Context, workerParameters: 
                             println(chi.value)
                             notificationJson.put(chi.key, chi.value)
                         }
-                        var notificationId = abs(System.nanoTime().toInt())
 
-                        println("NOTIFICATION IDDDDDD")
-                        println(notificationId.toString())
-                        db.collection("user").document(idDB).collection("friendrequest").document(child.id).delete()
-                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        jsonNotifId.put(notificationJson.getString("origin"), notificationId)
-                        val notification = NotificationCompat.Builder(context, "first").apply {
-                            setContentTitle("Richiesta d'amicizia")
-                            setContentText(notificationJson.getString("origin") + ": Ti ha inviato una richiesta di amicizia!")
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            println("OREOOOOOOOOOOOOOOO")
+                            // Create the NotificationChannel
+                            val name = "some_channel_id"
+                            val descriptionText = "Some Channel";
+                            val importance = NotificationManager.IMPORTANCE_DEFAULT
+                            val mChannel = NotificationChannel("some_channel_id", name, importance)
+                            mChannel.description = descriptionText
+                            // Register the channel with the system; you can't change the importance
+                            // or other notification behaviors after this
+                            val notificationManager =
+                                context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                            notificationManager.createNotificationChannel(mChannel)
+                        } else {
+                            println("NOTTTTT OREOOOOOOOOOOOOOOO")
+                            var notificationId = abs(System.nanoTime().toInt())
 
-                            setSmallIcon(R.drawable.ic_launcher_foreground)
-                            setAutoCancel(true) //collegato a tap notification
-                            val notificationClickIntent : Intent=  Intent(context,ShowFriendRequest::class.java)
-                            notificationClickIntent.putExtra("sender", notificationJson.getString("origin"))
-                            notificationClickIntent.putExtra("receiver", idDB)
-                            setContentIntent(PendingIntent.getActivity(context, 0,  notificationClickIntent, 0));
-                            priority = NotificationCompat.PRIORITY_DEFAULT
+                            db.collection("user").document(idDB).collection("friendrequest")
+                                .document(child.id).delete()
+                            val nm =
+                                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            jsonNotifId.put(notificationJson.getString("origin"), notificationId)
+                            val notification = NotificationCompat.Builder(context, "first").apply {
+                                setContentTitle("Richiesta d'amicizia")
+                                setContentText(notificationJson.getString("origin") + ": Ti ha inviato una richiesta di amicizia!")
 
-                            val acceptFriendIntent : Intent=  Intent(context,AcceptFriend::class.java)
-                            acceptFriendIntent.putExtra("sender", notificationJson.getString("origin"))
-                            acceptFriendIntent.putExtra("receiver", idDB);
+                                setSmallIcon(R.drawable.ic_launcher_foreground)
+                                setAutoCancel(true) //collegato a tap notification
+                                val notificationClickIntent: Intent =
+                                    Intent(context, ShowFriendRequest::class.java)
+                                notificationClickIntent.putExtra(
+                                    "sender",
+                                    notificationJson.getString("origin")
+                                )
+                                notificationClickIntent.putExtra("receiver", idDB)
+                                setContentIntent(
+                                    PendingIntent.getActivity(
+                                        context,
+                                        0,
+                                        notificationClickIntent,
+                                        0
+                                    )
+                                );
+                                priority = NotificationCompat.PRIORITY_DEFAULT
+
+                                val acceptFriendIntent: Intent =
+                                    Intent(context, AcceptFriend::class.java)
+                                acceptFriendIntent.putExtra(
+                                    "sender",
+                                    notificationJson.getString("origin")
+                                )
+                                acceptFriendIntent.putExtra("receiver", idDB);
 
 
+                                val acceptPendingIntent =
+                                    PendingIntent.getBroadcast(context, 0, acceptFriendIntent, 0)
 
+                                addAction(
+                                    R.drawable.ic_addfriendnotification,
+                                    "Accetta",
+                                    acceptPendingIntent
+                                )
 
+                                val declineFriendIntent: Intent =
+                                    Intent(context, DeclineFriend::class.java)
+                                declineFriendIntent.putExtra(
+                                    "sender",
+                                    notificationJson.getString("origin")
+                                )
+                                val declinePendingIntent = PendingIntent.getBroadcast(
+                                    context,
+                                    999,
+                                    declineFriendIntent,
+                                    PendingIntent.FLAG_ONE_SHOT
+                                )
+                                addAction(
+                                    R.drawable.ic_closenotification,
+                                    "Rifiuta",
+                                    declinePendingIntent
+                                )
 
-
-                            val acceptPendingIntent = PendingIntent.getBroadcast(context,0,acceptFriendIntent,0)
-
-                            addAction(R.drawable.ic_addfriendnotification, "Accetta", acceptPendingIntent )
-
-                            val declineFriendIntent : Intent=  Intent(context,DeclineFriend::class.java)
-                            declineFriendIntent.putExtra("sender", notificationJson.getString("origin"))
-                            val declinePendingIntent = PendingIntent.getBroadcast(context,999,declineFriendIntent,PendingIntent.FLAG_ONE_SHOT)
-                            addAction(R.drawable.ic_closenotification, "Rifiuta", declinePendingIntent )
-
-                        }.build()
-                        nm.notify(notificationId, notification)
+                            }.build()
+                            nm.notify(notificationId, notification)
+                        }
                         querySnapshot.documents.remove(child)
                     }
                 }

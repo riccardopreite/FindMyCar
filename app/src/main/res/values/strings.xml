@@ -19,7 +19,7 @@
     <string name="travelling">Travelling</string>
     <string name="privato">Privato</string>
     <string name="custom_btn">Aggiungi POI</string>
-    <string name="nome">Nome</string>
+    <string name="nome">Nome:</string>
     <string name="tipo">Privacy:</string>
     <string name="gender">Gender</string>
     <string name="reading">Reading</string>
@@ -50,6 +50,7 @@
     <string name="other_functionality">other functionality?</string>
     <string name="add">Aggiungi</string>
     <string name="nosrc">Nessun marker registrato!</string>
+    <string name="nocar">Nessuna macchina registrata!</string>
     <string name="nofriend">Ancora nessun amico!</string>
     <string name="title_activity_login">Sign in</string>
     <string name="prompt_email">Email</string>
@@ -76,4 +77,10 @@
     <string name="addFriend">Accetta</string>
     <string name="delete">Rifiuta</string>
     <string name="friendheader">Nuova richiesta di amicizia</string>
+    <string name="removeFriend">Rimuovi</string>
+    <string name="POIname">POI:</string>
+    <string name="car">Auto</string>
+    <string name="live">Live</string>
+    <string name="remind">Rimanda</string>
+    <string name="timer">Timer:</string>
 </resources>

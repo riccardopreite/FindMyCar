@@ -4,13 +4,6 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.IOException
-import java.net.URL
-import java.net.URLEncoder
 
 class DeclineFriend : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -19,7 +12,7 @@ class DeclineFriend : BroadcastReceiver() {
         var extras = intent?.extras
 
         var sender = extras?.get("sender")
-        var notificaionId = NotificationRequestWorker.jsonNotifId.get(sender as String)
+        var notificaionId = jsonNotifId.get(sender as String)
         notificationManager.cancel(notificaionId as Int)
     }
 }
