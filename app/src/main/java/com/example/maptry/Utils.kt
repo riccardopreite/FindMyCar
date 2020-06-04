@@ -418,6 +418,79 @@ fun createNotification(context:Context){
                     }
                 }
             }
+        MapsActivity.db.collection("user").document(idDB).collection("prova")
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+
+
+
+                if (firebaseFirestoreException != null) {
+                    Log.w("TAG", "Listen failed.", firebaseFirestoreException)
+                    return@addSnapshotListener
+                }
+
+                if (querySnapshot != null && querySnapshot.documents.isNotEmpty()) {
+                    notificationJson = JSONObject()
+                    MapsActivity.dataFromfirestore = querySnapshot.documents
+                    var key = ""
+                    var json = JSONObject()
+                    Log.d("TAGnotify", "Current data: ${querySnapshot.documents}")
+                    println("CIAOOOOnotify")
+                    querySnapshot.documents.forEach { child ->
+
+
+                        child.data?.forEach { chi ->
+
+                            println("each child")
+                            println(chi.key)
+                            println(chi.value)
+
+                            val CHANNEL_ID =
+                                "my_channel_01"
+                            println("PREPARE NOTIFICATION")
+
+
+                            notification = NotificationCompat.Builder(context, "first").apply {
+                                setContentTitle("LIVE PROVA")
+                                setContentText("STA ANDANDO")
+
+                                setSmallIcon(R.drawable.ic_dialog_map)
+                                setAutoCancel(true) //collegato a tap notification
+
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    println("create channel")
+                                    val name: CharSequence = "Channel prova"// The user-visible name of the channel.
+                                    val importance = NotificationManager.IMPORTANCE_HIGH
+                                    val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
+                                    nm.createNotificationChannel(mChannel)
+                                    setChannelId(CHANNEL_ID)
+                                }
+
+                            }.build()
+                            nm.notify(notificationId, notification)
+
+                        }
+
+                        MapsActivity.db.collection("user").document(idDB).collection("prova").document(child.id).delete()
+                    }
+                }
+
+            }
+//        MapsActivity.db.collection("user").document(idDB).collection("prova")
+//            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+//                println("HELOOOO")
+//                val nm =
+//                    MapsActivity.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//                val notification = NotificationCompat.Builder(MapsActivity.context, "first").apply {
+//                    setContentTitle("Evento Live")
+//                    setContentText("da file attivo")
+//                    setSmallIcon(com.example.maptry.R.drawable.ic_launcher_foreground)
+//
+//                    priority = NotificationCompat.PRIORITY_DEFAULT
+//                }.build()
+//
+//                nm.notify(System.currentTimeMillis().toInt(), notification)
+//            }
     }
 
     // Indicate whether the task finished successfully with the Result

@@ -13,10 +13,7 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.StrictMode
+import android.os.*
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -238,6 +235,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 //        println("STOPPPPPP")
 //        startService(Intent(this, NotificationService::class.java))
 //    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -674,6 +672,19 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 scheduleRepeatingTasks()
                 println(id)
 
+                val intent: Intent = Intent(this, NotifyService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    println("OREO")
+                    startService(intent)
+
+//                    startForegroundService(intent)
+                }
+                else{
+                    println("NOT OREO")
+                    startService(intent)
+                }
+
+
                 val x = findViewById<NavigationView>(R.id.nav_view).getHeaderView(0)
                 val google_button = x.findViewById<Button>(R.id.google_button)
                 val imageView = x.findViewById<ImageView>(R.id.imageView)
@@ -742,17 +753,26 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
         }
 
+    override fun onDestroy() {
+        println("DESTROY")
 
-    override fun onPause() {
-        super.onPause()
-        try{
-            alertDialog.dismiss()
-        }
-        catch (e:Exception){
 
-        }
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        super.onDestroy()
     }
+
+
+//    override fun onPause() {
+//        super.onPause()
+//        println("PAUSE")
+//
+//        try{
+//            alertDialog.dismiss()
+//        }
+//        catch (e:Exception){
+//
+//        }
+//        fusedLocationClient.removeLocationUpdates(locationCallback)
+//    }
 
     public override fun onResume() {
         super.onResume()
@@ -1435,7 +1455,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     fun scheduleRepeatingTasks() {
         /*Setting up different constraints on the work request.
          */
-        createNotification(this)
+//        createNotification(this)
 //        println("iniziato schedule")
 //        val constraints = Constraints.Builder().apply {
 //            setRequiredNetworkType(NetworkType.CONNECTED)
