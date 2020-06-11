@@ -6,6 +6,7 @@
         <item>Sport</item>
         <item>Svago</item>
         <item>Macchina</item>
+        <item>Live</item>
     </string-array>
 
     <string name="name">Nome:</string>

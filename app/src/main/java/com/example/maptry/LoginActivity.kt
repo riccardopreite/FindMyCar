@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.*
+import com.example.maptry.MapsActivity.Companion.firebaseAuth
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -22,7 +23,6 @@ class LoginActivity : AppCompatActivity() {
     val RC_SIGN_IN: Int = 1
      lateinit var mGoogleSignInClient: GoogleSignInClient
     lateinit var mGoogleSignInOptions: GoogleSignInOptions
-    private lateinit var firebaseAuth: FirebaseAuth
 
     private var account: GoogleSignInAccount? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
             data.data = Uri.parse("done");
             setResult(50, data);
             //---close the activity---
-            finish();
+//            finish();
 
         }else {
             var data : Intent = Intent();
@@ -129,7 +129,7 @@ class LoginActivity : AppCompatActivity() {
                 this.finish()
 
             } else {
-                Toast.makeText(this, "Google sign in failed:(", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Google sign in failed3:(", Toast.LENGTH_LONG).show()
             }
         }
     }

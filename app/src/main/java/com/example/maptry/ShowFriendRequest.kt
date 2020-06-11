@@ -22,25 +22,14 @@ class ShowFriendRequest : AppCompatActivity() {
         //create connection
 
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
+
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
         val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
         val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
-        drawerLayout.invalidate()
-        listLayout.invalidate()
-        homeLayout.invalidate()
-        splashLayout.invalidate()
-        listFriendLayout.invalidate()
-
-        drawerLayout.visibility = View.GONE
-        listLayout.visibility = View.GONE
-        homeLayout.visibility = View.GONE
-        splashLayout.visibility = View.GONE
-        listFriendLayout.visibility = View.GONE
-
-        friendLayout.bringToFront()
-        friendLayout.visibility = View.VISIBLE
+        switchFrame(friendLayout,drawerLayout,listLayout,homeLayout,splashLayout,listFriendLayout,carLayout)
         var extras = intent?.extras
         var sender = extras?.get("sender") as String
         var receiver = extras?.get("receiver") as String
@@ -52,11 +41,11 @@ class ShowFriendRequest : AppCompatActivity() {
         var buttonDecline:Button = findViewById(R.id.cancelFriendRequest)
         buttonAccept.setOnClickListener {
             confirmFriend(sender,receiver)
-            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout)
+            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout)
             finish()
         }
         buttonDecline.setOnClickListener {
-            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout)
+            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout)
             finish()
         }
 

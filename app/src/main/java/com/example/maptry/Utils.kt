@@ -39,17 +39,21 @@ var jsonNotifId = JSONObject()
 var notificationJson = JSONObject()
 var newFriendJson = JSONObject()
 
-fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout, toGone3: FrameLayout, toGone4: FrameLayout){
+fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout, toGone3: FrameLayout, toGone4: FrameLayout,toGone5: FrameLayout,toGone6: FrameLayout){
     toGone1.invalidate()
     toGone2.invalidate()
     toGone3.invalidate()
     toGone4.invalidate()
+    toGone5.invalidate()
+    toGone6.invalidate()
 
     toView.visibility = View.VISIBLE
     toGone1.visibility = View.GONE
     toGone2.visibility = View.GONE
     toGone3.visibility = View.GONE
     toGone4.visibility = View.GONE
+    toGone5.visibility = View.GONE
+    toGone6.visibility = View.GONE
 
     toView.startAnimation(mAnimation)
     mAnimation.start()

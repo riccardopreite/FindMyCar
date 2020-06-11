@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.example.maptry.NotifyService.Companion.jsonNotifIdFriendRequest
 
 class DeclineFriend : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -12,7 +13,7 @@ class DeclineFriend : BroadcastReceiver() {
         var extras = intent?.extras
 
         var sender = extras?.get("sender")
-        var notificaionId = jsonNotifId.get(sender as String)
+        var notificaionId = jsonNotifIdFriendRequest.get(sender as String)
         notificationManager.cancel(notificaionId as Int)
     }
 }

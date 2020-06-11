@@ -88,7 +88,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/bottom_border">
                 <TextView
-                    android:layout_width="150dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#000000"
                     android:text="@string/timer"
@@ -101,7 +101,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:timePickerMode="spinner"
-                    android:layout_toEndOf="@id/timer"/>
+                    android:layout_alignParentEnd="true"
+                    />
             </RelativeLayout>
 
             <RelativeLayout

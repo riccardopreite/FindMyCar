@@ -2,57 +2,47 @@ package com.example.maptry
 //DO SAME THING OF SHOW FRIEND REQUEST FOR SHOW CAR AND RIMANDA
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
-import com.example.maptry.MapsActivity
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import com.example.maptry.MapsActivity.Companion.account
 import com.example.maptry.MapsActivity.Companion.alertDialog
 import com.example.maptry.MapsActivity.Companion.myCar
 import com.google.android.material.snackbar.Snackbar
-import java.io.IOException
-import java.net.URL
-import java.net.URLEncoder
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
+
 class ShowCar : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
+    var name = ""
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
         //create connection
+        val extras = intent?.extras
+        name = extras?.get("name") as String
         //refactor to car layout
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
         val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
-        val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
-        friendRequestLayout.invalidate()
-        splashLayout.invalidate()
 
-        friendRequestLayout.visibility = View.GONE
-        splashLayout.visibility = View.GONE
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout)
 
         var close = findViewById<ImageView>(R.id.close_car)
         close.setOnClickListener {
 
-            friendRequestLayout.invalidate()
-            splashLayout.invalidate()
-
-            friendRequestLayout.visibility = View.GONE
-            splashLayout.visibility = View.GONE
-
-            switchFrame(homeLayout,carLayout,friendLayout,listLayout,drawerLayout)
+            switchFrame(homeLayout,carLayout,friendLayout,listLayout,drawerLayout,splashLayout,friendRequestLayout)
 
             finish()
         }
@@ -62,6 +52,7 @@ class ShowCar : AppCompatActivity() {
 
 
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showCar(){
         val len = myCar.length()
         var index = 0
@@ -73,12 +64,11 @@ class ShowCar : AppCompatActivity() {
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
-        val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
-        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
+        val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        friendRequestLayout.invalidate()
-        friendRequestLayout.visibility = View.GONE
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout)
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.lvCar)
@@ -101,8 +91,29 @@ class ShowCar : AppCompatActivity() {
             }
         }
         println(carList)
+        var pos = 0
 
         var  arrayAdapter : ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, carList)
+        lv.adapter = arrayAdapter;
+        for (i in myCar.keys()) {
+
+            if (myCar.getJSONObject(i).get("name") as String == name) {
+
+                lv.itemsCanFocus = true
+                lv.setSelection(pos)
+                println("PORC")
+                println(lv.getItemAtPosition(pos))
+                println(lv.selectedView)
+                lv.setItemChecked(pos,true)
+               // lv.getChildAt(pos).setBackgroundResource(R.color.quantum_black_100)
+
+                break
+            }
+            pos++
+        }
+
+
+
         lv.setOnItemLongClickListener { parent, view, position, id ->
 
             val inflater: LayoutInflater = this.layoutInflater
@@ -195,7 +206,7 @@ class ShowCar : AppCompatActivity() {
                 myCar.getJSONObject(key).put("timer",timer.hour*60 + timer.minute)
                 println(myCar.getJSONObject(key))
                 alertDialog.dismiss()
-                reminderAuto(myCar.getJSONObject(key))
+                resetTimerAuto(myCar.getJSONObject(key))
 
             }
 
@@ -211,7 +222,7 @@ class ShowCar : AppCompatActivity() {
 
             //show friend
         }
-        lv.adapter = arrayAdapter;
+
     }
 
 

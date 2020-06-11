@@ -46,16 +46,20 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.dialog_friend_view.*
+import kotlinx.android.synthetic.main.nav_header_navigation.*
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -103,9 +107,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
                 val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
                 val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
-                splashLayout.invalidate()
-                splashLayout.visibility = View.GONE
-                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout)
+                val carLayout: FrameLayout = findViewById(R.id.car_layout)
+
+                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout,splashLayout,carLayout)
                 mainHandler.removeCallbacksAndMessages(null);
             }
             else {
@@ -146,6 +150,10 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     }
 
     companion object {
+        var isRunning : Boolean = false
+        lateinit var firebaseAuth: FirebaseAuth
+
+
         lateinit var context : Context
         lateinit var alertDialog: AlertDialog
         lateinit var mMap: GoogleMap
@@ -157,11 +165,12 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val mymarker = JSONObject() //marker
         val myList = JSONObject() // POI json
         val myCar = JSONObject() // car json
+        val myLive = JSONObject() // car json
         lateinit var mAnimation : Animation
         lateinit var dataFromfirebase: DataSnapshot
         public var account : GoogleSignInAccount? = null
         lateinit var dataFromfirestore :List<DocumentSnapshot>
-        val db = Firebase.firestore
+        lateinit var db :FirebaseFirestore
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
         private const val REQUEST_CHECK_SETTINGS = 2
@@ -194,9 +203,12 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         layoutParams.setMargins(0, 0, 30, 30);
+        println("PRIMA LOCARIONNNN")
 
         fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
             // Got last known location. In some rare situations this can be null.
+            println("LOCARIONNNN")
+            println(location)
             if (location != null) {
                 if (zoom == 1) {
                     mMap.moveCamera(
@@ -230,15 +242,16 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-//    override fun onStop() {
-//        super.onStop()
-//        println("STOPPPPPP")
-//        startService(Intent(this, NotificationService::class.java))
-//    }
+    override fun onStop() {
+        super.onStop()
+        println("STOPPPPPP")
+        isRunning = false
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isRunning = true
         context = this
         val policy: StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -248,25 +261,19 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         //create connection
 
 
-        val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
-        val listLayout: FrameLayout = findViewById(R.id.list_layout)
-        val homeLayout: FrameLayout = findViewById(R.id.homeframe)
-        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
+        val drawerLayout: FrameLayout = findViewById(id.drawer_layout)
+        val listLayout: FrameLayout = findViewById(id.list_layout)
+        val homeLayout: FrameLayout = findViewById(id.homeframe)
+        val splashLayout: FrameLayout = findViewById(id.splashFrame)
+        val friendLayout: FrameLayout = findViewById(id.friend_layout)
+        val friendRequestLayout: FrameLayout = findViewById(id.friendFrame)
+        val carLayout: FrameLayout = findViewById(id.car_layout)
         mAnimation = AnimationUtils.loadAnimation(this, R.anim.enlarge);
         mAnimation.backgroundColor = Color.TRANSPARENT;
+        switchFrame(splashLayout,drawerLayout,listLayout,homeLayout,friendLayout,friendRequestLayout,carLayout)
 
-        drawerLayout.invalidate()
-        listLayout.invalidate()
-        homeLayout.invalidate()
 
-        splashLayout.visibility = View.VISIBLE
-        drawerLayout.visibility = View.GONE
-        listLayout.visibility = View.GONE
-        homeLayout.visibility = View.GONE
 
-        splashLayout.startAnimation(mAnimation);
-        mAnimation.start();
-        splashLayout.bringToFront()
         mainHandler = Handler(Looper.getMainLooper())
 
         mainHandler.post(run)
@@ -285,6 +292,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
                 super.onLocationResult(p0)
+                println("porcodio")
+                println(p0)
                 if (zoom == 1) {
                     mMap.moveCamera(
                         CameraUpdateFactory.newLatLngZoom(
@@ -359,11 +368,13 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             startActivity(Intent.createChooser(shareIntent,"Stai condividendo "+myList.getJSONObject(p0.position.toString()).get("name")))
             alertDialog.dismiss()
         }
-        val homeLayout: FrameLayout = findViewById(R.id.homeframe)
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
+        val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
 
         if (homeLayout.visibility == View.GONE) {
             routebutton.text = "Visualizza"
@@ -376,7 +387,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         ), 20F
                     )
                 )
-                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout)
+                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
                 alertDialog.dismiss()
             }
         }
@@ -460,9 +471,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 var type = parent?.getItemAtPosition(position) as String
                 println("SELECETED")
-                if(type == "Macchina"){
+                if(type == "Macchina" || type == "Live"){
 
-                    println("MACCHINA")
+                    println("MACCHINA & LIVE")
                     radioGroup.visibility = View.GONE
 
                     timePicker.setIs24HourView(true)
@@ -513,6 +524,16 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                     myCar.put(p0.toString(), myjson)
                     //add countdown for notification 5 minutes before end and give the intent to reset/set timer server call with timer to do this, write in DB
                     println(time)
+                }
+                else if(spinner.selectedItem.toString() == "Live"){
+                    println("LIVE EVENT")
+                    time = timePicker.hour * 60 + timePicker.minute
+                    myjson.put("timer", time.toString())
+                    myjson.put("name", text)
+                    myjson.put("address", address.text.toString())
+                    myjson.put("owner", account?.email?.replace("@gmail.com", ""))
+                    startLive(myjson)
+                    myLive.put(p0.toString(), myjson)
                 }
                 //                spinner on item selected
                 else{
@@ -658,19 +679,60 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         else if (requestCode == 40) {
             if (resultCode == 50) {
                 account = GoogleSignIn.getLastSignedInAccount(this@MapsActivity)
-                database = FirebaseDatabase.getInstance()
-                database.setPersistenceEnabled(true)
+                var id: String? = account?.email?.replace("@gmail.com", "")
+                isRunning = true
+
+
+          /*      FirebaseAuth.getInstance().signInWithCredential(GoogleAuthProvider.getCredential(account?.idToken, null)).addOnCompleteListener  {
+                    if (it.isSuccessful) {
+                        FirebaseFirestore.setLoggingEnabled(true)
+                        db = FirebaseFirestore.getInstance()
+
+                        var docRef = db.collection("user")
+                        println("DOCREFFF")
+
+                        if (id != null) {
+                            if (!db.document("user/" + id).get().isSuccessful) {
+                                docRef.document(id).set({})
+                            }
+                        }
+
+                        val intent: Intent = Intent(this, NotifyService::class.java)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            println("OREO")
+                            startService(intent)
+
+//                    startForegroundService(intent)
+                        }
+                        else{
+                            println("NOT OREO")
+                            startService(intent)
+                        }
+                        if (id != null) {
+                            createPoiList(id)
+                            createFriendList(id)
+                        }
+                    } else {
+                        println("BESTEMMIA")
+                        println(it.exception)
+
+                        Toast.makeText(this, "Google sign in failed:(", Toast.LENGTH_LONG).show()
+                    }
+                }*/
+
+               // database = FirebaseDatabase.getInstance()
+               // database.setPersistenceEnabled(true)
+                FirebaseFirestore.setLoggingEnabled(true)
+                db = FirebaseFirestore.getInstance()
+
                 var docRef = db.collection("user")
                 println("DOCREFFF")
-//                if(!docRef.get().isSuccessful) docRef.add({})
-                var id: String? = account?.email?.replace("@gmail.com", "")
+
                 if (id != null) {
                     if (!db.document("user/" + id).get().isSuccessful) {
                         docRef.document(id).set({})
                     }
                 }
-                scheduleRepeatingTasks()
-                println(id)
 
                 val intent: Intent = Intent(this, NotifyService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -682,6 +744,10 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 else{
                     println("NOT OREO")
                     startService(intent)
+                }
+                if (id != null) {
+                    createPoiList(id)
+                    createFriendList(id)
                 }
 
 
@@ -709,9 +775,11 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                     val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
                     val listLayout: FrameLayout = findViewById(R.id.list_layout)
                     val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+                    val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
                     val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
                     val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
-                    switchFrame(drawerLayout, listLayout, homeLayout,friendLayout,friendRequestLayout)
+                    val carLayout: FrameLayout = findViewById(R.id.car_layout)
+                    switchFrame(drawerLayout, listLayout, homeLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
                 })
                 user.visibility = View.VISIBLE
                 user.text = account?.displayName
@@ -721,10 +789,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 close.visibility = View.VISIBLE
                 //draw all poi from DB and update localjson
 
-                if (id != null) {
-                    createPoiList(id)
-                    createFriendList(id)
-                }
+
             }
 
 //
@@ -753,12 +818,12 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
         }
 
-    override fun onDestroy() {
-        println("DESTROY")
+   // override fun onDestroy() {
+   //     println("DESTROY")
 
 
-        super.onDestroy()
-    }
+    //    super.onDestroy()
+   // }
 
 
 //    override fun onPause() {
@@ -933,9 +998,11 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
-        switchFrame(listLayout,homeLayout,drawerLayout,friendLayout,friendRequestLayout)
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
+        switchFrame(listLayout,homeLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
 
 
         var  lv:ListView = findViewById<ListView>(R.id.lv)
@@ -1056,9 +1123,11 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
-        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout)
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
+        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout)
 
 
         var  lv:ListView = findViewById<ListView>(R.id.fv)
@@ -1142,7 +1211,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             var context = this
             txtName.text = selectedItem
                 println("CLICK")
-            var url = URL("http://192.168.1.80:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
+         //   var url = URL("http://192.168.1.80:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
+            var url = URL("http://192.168.1.138:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
+            //var url = URL("http://192.168.43.76:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
             var result = JSONObject()
             val client = OkHttpClient()
             val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
@@ -1158,6 +1229,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 .build()
 
             client.newCall(request).enqueue(object : Callback {
+
                 override fun onFailure(call: okhttp3.Call, e: IOException) {
                     println("something went wrong")
                 }
@@ -1218,13 +1290,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                                                 ), 20F
                                             )
                                         )
-                                        switchFrame(
-                                            homeLayout,
-                                            friendLayout,
-                                            listLayout,
-                                            drawerLayout,
-                                            friendRequestLayout
-                                        )
+
+                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout)
                                         alertDialog2.dismiss()
                                         showPOIPreferences(pos.toString(),inflater,context,mark!!)
                                     }
@@ -1277,12 +1344,11 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        friendRequestLayout.invalidate()
-        friendRequestLayout.visibility = View.GONE
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.lvCar)
@@ -1399,7 +1465,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 myCar.getJSONObject(key).put("timer",timer.hour*60 + timer.minute)
                 println(myCar.getJSONObject(key))
                 alertDialog.dismiss()
-                reminderAuto(myCar.getJSONObject(key))
+                resetTimerAuto(myCar.getJSONObject(key))
 
             }
 

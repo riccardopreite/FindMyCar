@@ -2,6 +2,7 @@ package com.example.maptry
 
 
 import android.app.*
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -9,15 +10,24 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
-import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.maptry.MapsActivity.Companion.context
+import com.example.maptry.MapsActivity.Companion.isRunning
+import com.example.maptry.MapsActivity.Companion.myLive
 import org.json.JSONObject
 
 
 class NotifyService : Service() {
+    companion object {
+        var jsonNotifIdLive = JSONObject()
+        var jsonNotifIdFriendRequest = JSONObject()
+        var jsonNotifIdRemind = JSONObject()
+        var jsonNotifIdExpired = JSONObject()
+    }
+
+
 /*
     private val TAG = "ServiceExample"
 
@@ -97,13 +107,11 @@ class NotifyService : Service() {
         override fun onDestroy() {
             super.onDestroy()
             println("The service has been destroyed".toUpperCase())
-            Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show()
         }
 
         private fun startService() {
             if (isServiceStarted) return
             println("Starting the foreground service task")
-            Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show()
             isServiceStarted = true
 //            setServiceState(this, ServiceState.STARTED)
 
@@ -142,38 +150,143 @@ class NotifyService : Service() {
                                         Log.d("TAG", "Current data: ${querySnapshot.documents}")
                                         println("CIAOOOO in live")
                                         querySnapshot.documents.forEach { child ->
-
+                                            var json = JSONObject()
                                             child.data?.forEach { chi ->
                                                 println(chi.key)
                                                 println(chi.value)
-                                                notificationJson.put(chi.key, chi.value)
+                                                json = JSONObject(chi.value as HashMap<*, *>)
+                                                val CHANNEL_ID =
+                                                    "my_channel_01"
+                                                val nm =
+                                                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                                                val notification =
+                                                    NotificationCompat.Builder(context, "first")
+                                                        .apply {
+                                                            setContentTitle("Evento Live")
+                                                            setContentText(
+                                                                json.getString(
+                                                                    "owner"
+                                                                ) + ": Ha aggiunto un nuovo POI live!"
+                                                            )
+                                                            setSmallIcon(R.drawable.ic_addfriend)
+                                                            setAutoCancel(true)
+//                            setSmallIcon(R.drawable.ic_launcher_foreground)
+                                                            if(isRunning){
+
+                                                                val showLiveEvent: Intent =
+                                                                    Intent(
+                                                                        context,
+                                                                        ShowLiveEvent::class.java
+                                                                    )
+                                                                showLiveEvent.putExtra(
+                                                                    "owner",
+                                                                    json.get("owner") as String
+//                                                            notificationJson.getString("origin")
+                                                                )
+                                                                showLiveEvent.putExtra(
+                                                                    "address",
+                                                                    json.get("address") as String
+//                                                            notificationJson.getString("origin")
+                                                                )
+                                                                showLiveEvent.putExtra(
+                                                                    "name",
+                                                                    json.get("name") as String
+//                                                            notificationJson.getString("origin")
+                                                                )
+                                                                showLiveEvent.putExtra(
+                                                                    "timer",
+                                                                    json.get("timer") as String
+                                                                )
+                                                                setContentIntent(
+                                                                    PendingIntent.getActivity(
+                                                                        context,
+                                                                        87,
+                                                                        showLiveEvent,
+                                                                        FLAG_UPDATE_CURRENT
+                                                                    )
+                                                                )
+                                                            }
+                                                            else{
+                                                                println("IS RUNNING E FALSE")
+                                                                val intent = Intent(
+                                                                    context,
+                                                                    MapsActivity::class.java
+                                                                )
+                                                                val showLiveEvent =
+                                                                    Intent(
+                                                                        context,
+                                                                        ShowLiveEvent::class.java
+                                                                    )
+                                                                showLiveEvent.putExtra(
+                                                                    "owner",
+                                                                    json.get("owner") as String
+//                                                            notificationJson.getString("origin")
+                                                                )
+                                                                showLiveEvent.putExtra(
+                                                                    "address",
+                                                                    json.get("address") as String
+//                                                            notificationJson.getString("origin")
+                                                                )
+                                                                showLiveEvent.putExtra(
+                                                                    "name",
+                                                                    json.get("name") as String
+//                                                            notificationJson.getString("origin")
+                                                                )
+                                                                showLiveEvent.putExtra(
+                                                                    "timer",
+                                                                    json.get("timer") as String
+                                                                )
+
+                                                                val stackBuilder =
+                                                                    TaskStackBuilder.create(context)
+                                                                stackBuilder.addParentStack(
+                                                                    MapsActivity::class.java
+                                                                )
+                                                               // stackBuilder.addNextIntent(
+                                                                 //   intent
+                                                                //)
+                                                                stackBuilder.addNextIntent(
+                                                                    showLiveEvent
+                                                                )
+
+                                                                val pendingIntent =
+                                                                    stackBuilder.getPendingIntent(
+                                                                        86,
+                                                                        FLAG_UPDATE_CURRENT
+                                                                    )
+                                                                setContentIntent(pendingIntent)
+                                                            }
+
+
+                                                            priority =
+                                                                NotificationCompat.PRIORITY_DEFAULT
+                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                println("create channel")
+                                                                val name: CharSequence =
+                                                                    "Channel prova"// The user-visible name of the channel.
+                                                                val importance =
+                                                                    NotificationManager.IMPORTANCE_HIGH
+                                                                val mChannel = NotificationChannel(
+                                                                    CHANNEL_ID,
+                                                                    name,
+                                                                    importance
+                                                                )
+                                                                nm.createNotificationChannel(mChannel)
+                                                                setChannelId(CHANNEL_ID)
+                                                            }
+                                                        }.build()
+
+                                                nm.notify(notificationId, notification)
+
                                             }
                                             MapsActivity.db.collection("user").document(idDB)
                                                 .collection("live").document(child.id).delete()
-
-                                            val nm =
-                                                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                                            val notification =
-                                                NotificationCompat.Builder(context, "first").apply {
-                                                    setContentTitle("Evento Live")
-                                                    setContentText(notificationJson.getString("origin") + ": Ha aggiunto un nuovo POI live!")
-//                            setSmallIcon(R.drawable.ic_launcher_foreground)
-
-                                                    priority = NotificationCompat.PRIORITY_DEFAULT
-                                                }.build()
-
-                                            nm.notify(
-                                                System.currentTimeMillis().toInt(),
-                                                notification
-                                            )
-
                                         }
                                     }
                                 }
                             //Listner for friend Request
                             MapsActivity.db.collection("user").document(idDB).collection("friendrequest")
                                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                                    var notificationId = Math.abs(System.nanoTime().toInt())
                                     if (firebaseFirestoreException != null) {
                                         Log.w("TAG", "Listen failed.", firebaseFirestoreException)
                                         return@addSnapshotListener
@@ -189,118 +302,163 @@ class NotifyService : Service() {
                                         )
                                         println("CIAOOOOnotify")
                                         querySnapshot.documents.forEach { child ->
-                                            child.data?.forEach { chi ->
+                                            child.data?.forEach {    chi ->
+                                                var notificationId = Math.abs(System.nanoTime().toInt())
                                                 println(chi.key)
                                                 println(chi.value)
-                                                notificationJson.put(chi.key, chi.value)
+                                                jsonNotifIdFriendRequest.put(
+                                                    chi.value as String,
+                                                    notificationId
+                                                )
+//                                                notificationJson.put(chi.key, chi.value)
+                                                val CHANNEL_ID =
+                                                    "my_channel_01"
+                                                notification =
+                                                    NotificationCompat.Builder(context, "first").apply {
+                                                        setContentTitle("Richiesta d'amicizia")
+//                                                        setContentText(notificationJson.getString("origin") + ": Ti ha inviato una richiesta di amicizia!")
+                                                        setContentText(chi.value as String + ": Ti ha inviato una richiesta di amicizia!")
+
+                                                        setSmallIcon(R.drawable.ic_addfriend)
+                                                        setAutoCancel(true) //collegato a tap notification
+
+                                                        if(isRunning){
+
+                                                            val notificationClickIntent: Intent =
+                                                                Intent(
+                                                                    context,
+                                                                    ShowFriendRequest::class.java
+                                                                )
+                                                            notificationClickIntent.putExtra(
+                                                                "sender",
+                                                                chi.value as String
+//                                                            notificationJson.getString("origin")
+                                                            )
+                                                            notificationClickIntent.putExtra(
+                                                                "receiver",
+                                                                idDB
+                                                            )
+                                                            setContentIntent(
+                                                                PendingIntent.getActivity(
+                                                                    context,
+                                                                    88,
+                                                                    notificationClickIntent,
+                                                                    FLAG_UPDATE_CURRENT
+                                                                )
+                                                            )
+                                                        }
+                                                        else{
+                                                            println("IS RUNNING E FALSE")
+                                                            val intent = Intent(
+                                                                context,
+                                                                MapsActivity::class.java
+                                                            )
+                                                            val intentFriendRequest =
+                                                                Intent(
+                                                                    context,
+                                                                    ShowFriendRequest::class.java
+                                                                )
+                                                            intentFriendRequest.putExtra(
+                                                                        "sender",
+                                                                        chi.value as String
+//                                                            notificationJson.getString("origin")
+                                                                    )
+                                                            intentFriendRequest.putExtra(
+                                                                "receiver",
+                                                                idDB
+                                                            )
+
+                                                            val stackBuilder =
+                                                                TaskStackBuilder.create(context)
+                                                            stackBuilder.addParentStack(
+                                                                MapsActivity::class.java
+                                                            )
+                                                            //stackBuilder.addNextIntent(intent)
+                                                            stackBuilder.addNextIntent(
+                                                                intentFriendRequest
+                                                            )
+
+                                                            val pendingIntent =
+                                                                stackBuilder.getPendingIntent(
+                                                                    89,
+                                                                    FLAG_UPDATE_CURRENT
+                                                                )
+                                                            setContentIntent(pendingIntent)
+                                                        }
+
+
+                                                        priority = NotificationCompat.PRIORITY_DEFAULT
+
+                                                        val acceptFriendIntent: Intent =
+                                                            Intent(context, AcceptFriend::class.java)
+                                                        acceptFriendIntent.putExtra(
+                                                            "sender",
+                                                            chi.value as String
+//                                                            notificationJson.getString("origin")
+                                                        )
+                                                        acceptFriendIntent.putExtra("receiver", idDB);
+
+
+                                                        val acceptPendingIntent =
+                                                            PendingIntent.getBroadcast(
+                                                                context,
+                                                                90,
+                                                                acceptFriendIntent,
+                                                                PendingIntent.FLAG_ONE_SHOT
+                                                            )
+
+                                                        addAction(
+                                                            R.drawable.ic_add,
+                                                            "Accetta",
+                                                            acceptPendingIntent
+                                                        )
+
+                                                        val declineFriendIntent: Intent =
+                                                            Intent(context, DeclineFriend::class.java)
+                                                        declineFriendIntent.putExtra(
+                                                            "sender",
+                                                            chi.value as String
+//                                                            notificationJson.getString("origin")
+                                                        )
+                                                        val declinePendingIntent =
+                                                            PendingIntent.getBroadcast(
+                                                                context,
+                                                                91,
+                                                                declineFriendIntent,
+                                                                PendingIntent.FLAG_ONE_SHOT
+                                                            )
+                                                        addAction(
+                                                            R.drawable.ic_close,
+                                                            "Rifiuta",
+                                                            declinePendingIntent
+                                                        )
+                                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                            println("create channel")
+                                                            val name: CharSequence =
+                                                                "Channel prova"// The user-visible name of the channel.
+                                                            val importance =
+                                                                NotificationManager.IMPORTANCE_HIGH
+                                                            val mChannel = NotificationChannel(
+                                                                CHANNEL_ID,
+                                                                name,
+                                                                importance
+                                                            )
+                                                            nm.createNotificationChannel(mChannel)
+                                                            setChannelId(CHANNEL_ID)
+                                                        }
+
+                                                    }.build()
+                                                nm.notify(notificationId, notification)
+                                                MapsActivity.db.collection("user").document(idDB)
+                                                    .collection("friendrequest")
+                                                    .document(child.id).delete()
                                             }
-                                            val CHANNEL_ID =
-                                                "my_channel_01"
-                                            println("PREPARE NOTIFICATION")
 
-
-
-                                            MapsActivity.db.collection("user").document(idDB)
-                                                .collection("friendrequest")
-                                                .document(child.id).delete()
-
-                                            jsonNotifId.put(
-                                                notificationJson.getString("origin"),
-                                                notificationId
-                                            )
-                                            notification =
-                                                NotificationCompat.Builder(context, "first").apply {
-                                                    setContentTitle("Richiesta d'amicizia")
-                                                    setContentText(notificationJson.getString("origin") + ": Ti ha inviato una richiesta di amicizia!")
-
-                                                    setSmallIcon(R.drawable.ic_addfriend)
-                                                    setAutoCancel(true) //collegato a tap notification
-                                                    val notificationClickIntent: Intent =
-                                                        Intent(
-                                                            context,
-                                                            ShowFriendRequest::class.java
-                                                        )
-                                                    notificationClickIntent.putExtra(
-                                                        "sender",
-                                                        notificationJson.getString("origin")
-                                                    )
-                                                    notificationClickIntent.putExtra(
-                                                        "receiver",
-                                                        idDB
-                                                    )
-                                                    setContentIntent(
-                                                        PendingIntent.getActivity(
-                                                            context,
-                                                            0,
-                                                            notificationClickIntent,
-                                                            0
-                                                        )
-                                                    );
-                                                    priority = NotificationCompat.PRIORITY_DEFAULT
-
-                                                    val acceptFriendIntent: Intent =
-                                                        Intent(context, AcceptFriend::class.java)
-                                                    acceptFriendIntent.putExtra(
-                                                        "sender",
-                                                        notificationJson.getString("origin")
-                                                    )
-                                                    acceptFriendIntent.putExtra("receiver", idDB);
-
-
-                                                    val acceptPendingIntent =
-                                                        PendingIntent.getBroadcast(
-                                                            context,
-                                                            0,
-                                                            acceptFriendIntent,
-                                                            0
-                                                        )
-
-                                                    addAction(
-                                                        R.drawable.ic_add,
-                                                        "Accetta",
-                                                        acceptPendingIntent
-                                                    )
-
-                                                    val declineFriendIntent: Intent =
-                                                        Intent(context, DeclineFriend::class.java)
-                                                    declineFriendIntent.putExtra(
-                                                        "sender",
-                                                        notificationJson.getString("origin")
-                                                    )
-                                                    val declinePendingIntent =
-                                                        PendingIntent.getBroadcast(
-                                                            context,
-                                                            999,
-                                                            declineFriendIntent,
-                                                            PendingIntent.FLAG_ONE_SHOT
-                                                        )
-                                                    addAction(
-                                                        R.drawable.ic_close,
-                                                        "Rifiuta",
-                                                        declinePendingIntent
-                                                    )
-                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                        println("create channel")
-                                                        val name: CharSequence =
-                                                            "Channel prova"// The user-visible name of the channel.
-                                                        val importance =
-                                                            NotificationManager.IMPORTANCE_HIGH
-                                                        val mChannel = NotificationChannel(
-                                                            CHANNEL_ID,
-                                                            name,
-                                                            importance
-                                                        )
-                                                        nm.createNotificationChannel(mChannel)
-                                                        setChannelId(CHANNEL_ID)
-                                                    }
-
-                                                }.build()
-                                            nm.notify(notificationId, notification)
-                                            querySnapshot.documents.remove(child)
+//                                            querySnapshot.documents.remove(child)
                                         }
                                     }
                                 }
-                            MapsActivity.db.collection("user").document(idDB).collection("friend")
+                            MapsActivity.db.collection("user").document(idDB).collection("addedfriend")
                                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                                     var notificationId = Math.abs(System.nanoTime().toInt())
                                     if (firebaseFirestoreException != null) {
@@ -319,25 +477,6 @@ class NotifyService : Service() {
                                         println("CIAOOOOnotify")
                                         querySnapshot.documents.forEach { child ->
                                             child.data?.forEach { chi ->
-                                                    var founded = false
-
-                                                    println("NUOVO AMICO")
-                                                    println(chi.key)
-                                                    println(chi.value)
-
-                                                    for (x in MapsActivity.friendJson.keys()) {
-                                                        if (MapsActivity.friendJson.get(x) == chi.value
-                                                        ) {
-                                                            founded = true
-                                                            break
-                                                        }
-                                                    }
-                                                    if(!founded){
-
-                                                        println(chi.key)
-                                                        println(chi.value)
-//                                                newFriendJson.put(chi.key, chi.value)
-
                                                         val CHANNEL_ID =
                                                             "my_channel_01"
                                                         println("PREPARE NOTIFICATION")
@@ -349,19 +488,55 @@ class NotifyService : Service() {
 
                                                                 setSmallIcon(R.drawable.ic_accessibility)
                                                                 setAutoCancel(true) //collegato a tap notification
-                                                                val notificationClickIntent: Intent =
-                                                                    Intent(
-                                                                        context,
-                                                                        ShowFriendRequest::class.java
+
+                                                                if(isRunning){
+                                                                    println("IS RUNNING E TRUE")
+                                                                    val notificationClickIntent: Intent =
+                                                                        Intent(
+                                                                            context,
+                                                                            ShowFriendList::class.java
+                                                                        )
+                                                                    setContentIntent(
+                                                                        PendingIntent.getActivity(
+                                                                            context,
+                                                                            92,
+                                                                            notificationClickIntent,
+                                                                            FLAG_UPDATE_CURRENT
+                                                                        )
                                                                     )
-                                                                setContentIntent(
-                                                                    PendingIntent.getActivity(
+                                                                }
+                                                                else{
+                                                                    println("IS RUNNING E FALSE")
+                                                                    val intent = Intent(
                                                                         context,
-                                                                        0,
-                                                                        notificationClickIntent,
-                                                                        0
+                                                                        MapsActivity::class.java
                                                                     )
-                                                                );
+                                                                    val intentFriendList =
+                                                                        Intent(
+                                                                            context,
+                                                                            ShowFriendList::class.java
+                                                                        )
+                                                                    val stackBuilder =
+                                                                        TaskStackBuilder.create(context)
+                                                                    stackBuilder.addParentStack(
+                                                                        MapsActivity::class.java
+                                                                    )
+                                                                    //stackBuilder.addNextIntent(
+                                                                     //   intent
+                                                                    //)
+                                                                    stackBuilder.addNextIntent(
+                                                                        intentFriendList
+                                                                    )
+
+                                                                    val pendingIntent =
+                                                                        stackBuilder.getPendingIntent(
+                                                                            93,
+                                                                            FLAG_UPDATE_CURRENT
+                                                                        )
+                                                                    setContentIntent(pendingIntent)
+                                                                }
+
+
                                                                 priority = NotificationCompat.PRIORITY_DEFAULT
 
                                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -381,14 +556,11 @@ class NotifyService : Service() {
 
                                                             }.build()
                                                         nm.notify(notificationId, notification)
-                                                    }
-
-
-
-
+//                                                    }
+                                                MapsActivity.db.collection("user").document(idDB)
+                                                    .collection("addedfriend").document(child.id).delete()
                                                 }
                                             }
-
                                         }
                                     }
 //                                }
@@ -424,13 +596,14 @@ class NotifyService : Service() {
                                                     json.get("owner") as String + json.get("name") as String
                                                 println("JSON")
                                                 var name = json.get("name") as String
+                                                var owner = json.get("owner") as String
                                                 println(json.getString("name"))
                                                 val CHANNEL_ID =
                                                     "my_channel_01"
                                                 println("PREPARE NOTIFICATION")
 
 
-                                                jsonNotifId.put(
+                                                jsonNotifIdRemind.put(
                                                     json.getString("owner"),
                                                     notificationId
                                                 )
@@ -446,20 +619,59 @@ class NotifyService : Service() {
 
                                                             setSmallIcon(R.drawable.ic_car)
                                                             setAutoCancel(true) //collegato a tap notification
-                                                            val notificationClickIntent: Intent =
-                                                                Intent(context, ShowCar::class.java)
-                                                            notificationClickIntent.putExtra(
-                                                                "name",
-                                                                name
-                                                            )
-                                                            setContentIntent(
-                                                                PendingIntent.getActivity(
-                                                                    context,
-                                                                    99,
-                                                                    notificationClickIntent,
-                                                                    PendingIntent.FLAG_UPDATE_CURRENT
+
+                                                            if(isRunning){
+                                                                println("IS RUNNING E TRUE")
+                                                                val notificationClickIntent: Intent =
+                                                                    Intent(context, ShowCar::class.java)
+                                                                notificationClickIntent.putExtra(
+                                                                    "name",
+                                                                    name
                                                                 )
-                                                            );
+                                                                setContentIntent(
+                                                                    PendingIntent.getActivity(
+                                                                        context,
+                                                                        95,
+                                                                        notificationClickIntent,
+                                                                        FLAG_UPDATE_CURRENT
+                                                                    )
+                                                                )
+                                                            }
+                                                            else{
+                                                                println("IS RUNNING E FALSE")
+                                                                val intent = Intent(
+                                                                    context,
+                                                                    MapsActivity::class.java
+                                                                )
+                                                                val intentFriendList =
+                                                                    Intent(
+                                                                        context,
+                                                                        ShowCar::class.java
+                                                                    )
+                                                                val stackBuilder =
+                                                                    TaskStackBuilder.create(context)
+                                                                stackBuilder.addParentStack(
+                                                                    MapsActivity::class.java
+                                                                )
+                                                                //stackBuilder.addNextIntent(
+                                                                 //   intent
+                                                                //)
+                                                                stackBuilder.addNextIntent(
+                                                                    intentFriendList
+                                                                )
+
+                                                                val pendingIntent =
+                                                                    stackBuilder.getPendingIntent(
+                                                                        94,
+                                                                        FLAG_UPDATE_CURRENT
+                                                                    )
+                                                                setContentIntent(pendingIntent)
+                                                            }
+
+
+
+
+
                                                             //intent for open car
                                                             priority =
                                                                 NotificationCompat.PRIORITY_DEFAULT
@@ -473,8 +685,11 @@ class NotifyService : Service() {
                                                             acceptReminderIntent.putExtra(
                                                                 "name",
                                                                 name
-                                                            )//modify to enter timer or open to set timer
-
+                                                            )
+                                                            acceptReminderIntent.putExtra(
+                                                                "owner",
+                                                                owner
+                                                            )
 
                                                             val acceptPendingIntent =
                                                                 PendingIntent.getActivity(
@@ -518,7 +733,7 @@ class NotifyService : Service() {
                                         }
                                     }
                                 }
-                            MapsActivity.db.collection("user").document(idDB).collection("prova")
+                            MapsActivity.db.collection("user").document(idDB).collection("timedExpired")
                                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                                     var notificationId = Math.abs(System.nanoTime().toInt())
 
@@ -545,21 +760,152 @@ class NotifyService : Service() {
                                                 println("each child")
                                                 println(chi.key)
                                                 println(chi.value)
-
+                                                json = JSONObject(chi.value as HashMap<*, *>)
+                                                key =
+                                                    json.get("owner") as String + json.get("name") as String
+                                                println("JSON")
+                                                val name = json.get("name") as String
+                                                val owner = json.get("owner") as String
+                                                val address = json.get("address") as String
+                                                println(json.getString("name"))
                                                 val CHANNEL_ID =
                                                     "my_channel_01"
                                                 println("PREPARE NOTIFICATION")
 
+                                                //divide jsonNotify for each listner
 
+                                                jsonNotifIdExpired.put(
+                                                    json.getString("owner"),
+                                                    notificationId
+                                                )
                                                 notification =
                                                     NotificationCompat.Builder(context, "first")
                                                         .apply {
-                                                            setContentTitle("LIVE PROVA")
-                                                            setContentText("STA ANDANDO")
+                                                            setContentTitle("Reminder auto")
+                                                            setContentText(
+                                                                "E' finito il timer di " + json.getString(
+                                                                    "name"
+                                                                ) + "."
+                                                            )
 
-                                                            setSmallIcon(R.drawable.ic_live)
+                                                            setSmallIcon(R.drawable.ic_car)
                                                             setAutoCancel(true) //collegato a tap notification
 
+                                                            if(isRunning){
+                                                                println("IS RUNNING E TRUE")
+                                                                val notificationClickIntent: Intent =
+                                                                    Intent(context, ShowCar::class.java)
+                                                                notificationClickIntent.putExtra(
+                                                                    "name",
+                                                                    name
+                                                                )
+                                                                setContentIntent(
+                                                                    PendingIntent.getActivity(
+                                                                        context,
+                                                                        99,
+                                                                        notificationClickIntent,
+                                                                        FLAG_UPDATE_CURRENT
+                                                                    )
+                                                                )
+                                                            }
+                                                            else{
+                                                                println("IS RUNNING E FALSE")
+                                                                val intent = Intent(
+                                                                    context,
+                                                                    MapsActivity::class.java
+                                                                )
+                                                                val intentFriendList =
+                                                                    Intent(
+                                                                        context,
+                                                                        ShowCar::class.java
+                                                                    )
+                                                                val stackBuilder =
+                                                                    TaskStackBuilder.create(context)
+                                                                stackBuilder.addParentStack(
+                                                                    MapsActivity::class.java
+                                                                )
+                                                              //  stackBuilder.addNextIntent(
+                                                                //    intent
+                                                               // )
+                                                                stackBuilder.addNextIntent(
+                                                                    intentFriendList
+                                                                )
+
+                                                                val pendingIntent =
+                                                                    stackBuilder.getPendingIntent(
+                                                                        96,
+                                                                        FLAG_UPDATE_CURRENT
+                                                                    )
+                                                                setContentIntent(pendingIntent)
+                                                            }
+
+
+
+
+
+                                                            //intent for open car
+                                                            priority =
+                                                                NotificationCompat.PRIORITY_DEFAULT
+                                                            println("INTENT")
+                                                            println(name)
+                                                            val acceptReminderIntent: Intent =
+                                                                Intent(
+                                                                    context, /*ShowCar::class.java*/
+                                                                    RemindTimer::class.java
+                                                                ) // change intent
+                                                            acceptReminderIntent.putExtra(
+                                                                "name",
+                                                                name
+                                                            )
+                                                            acceptReminderIntent.putExtra(
+                                                                "owner",
+                                                                owner
+                                                            )
+
+                                                            val acceptPendingIntent =
+                                                                PendingIntent.getActivity(
+                                                                    context,
+                                                                    97,
+                                                                    acceptReminderIntent,
+                                                                    PendingIntent.FLAG_UPDATE_CURRENT
+                                                                )
+
+                                                            addAction(
+                                                                R.drawable.ic_add,
+                                                                "Rimanda",
+                                                                acceptPendingIntent
+                                                            )
+                                                            val deleteReminderIntent: Intent =
+                                                                Intent(
+                                                                    context, /*ShowCar::class.java*/
+                                                                    DeleteTimer::class.java
+                                                                ) // change intent
+                                                            deleteReminderIntent.putExtra(
+                                                                "name",
+                                                                name
+                                                            )
+                                                            deleteReminderIntent.putExtra(
+                                                                "owner",
+                                                                owner
+                                                            )
+                                                            deleteReminderIntent.putExtra(
+                                                                "address",
+                                                                address
+                                                            )
+
+                                                            val deletePendingIntent =
+                                                                PendingIntent.getActivity(
+                                                                    context,
+                                                                    98,
+                                                                    deleteReminderIntent,
+                                                                    FLAG_UPDATE_CURRENT
+                                                                )
+
+                                                            addAction(
+                                                                R.drawable.ic_closenotification,
+                                                                "Elimina",
+                                                                deletePendingIntent
+                                                            )
 
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                 println("create channel")
@@ -581,20 +927,20 @@ class NotifyService : Service() {
                                                         }.build()
                                                 nm.notify(notificationId, notification)
 
+                                                notificationJson.put(key, json)
                                             }
-
                                             MapsActivity.db.collection("user").document(idDB)
-                                                .collection("prova").document(child.id).delete()
+                                                .collection("timedExpired").document(child.id).delete()
+
                                         }
                                     }
-
                                 }
+
                         }
         }
 
             private fun stopService() {
                 println("Stopping the foreground service")
-                Toast.makeText(this, "Service stopping", Toast.LENGTH_SHORT).show()
                 try {
                     wakeLock?.let {
                         if (it.isHeld) {

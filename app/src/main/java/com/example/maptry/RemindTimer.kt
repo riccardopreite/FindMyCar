@@ -2,6 +2,8 @@ package com.example.maptry
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.NotificationManager
+import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
@@ -14,6 +16,7 @@ import com.example.maptry.MapsActivity.Companion.account
 import com.example.maptry.MapsActivity.Companion.alertDialog
 import com.example.maptry.MapsActivity.Companion.context
 import com.example.maptry.MapsActivity.Companion.myCar
+import com.example.maptry.NotifyService.Companion.jsonNotifIdRemind
 import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
 import java.net.URL
@@ -23,12 +26,15 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 class RemindTimer : AppCompatActivity() {
     var name = ""
+    var owner = ""
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var notificationManager : NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         setContentView(R.layout.activity_maps)
         val extras = intent?.extras
         name = extras?.get("name") as String
+        owner = extras.get("owner") as String
 
         val close = findViewById<ImageView>(R.id.close_car)
         close.setOnClickListener {
@@ -40,23 +46,12 @@ class RemindTimer : AppCompatActivity() {
             val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
             val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
             val carLayout: FrameLayout = findViewById(R.id.car_layout)
-            drawerLayout.invalidate()
-            listLayout.invalidate()
-            carLayout.invalidate()
-            splashLayout.invalidate()
-            listFriendLayout.invalidate()
-            friendLayout.invalidate()
 
-            friendLayout.visibility = View.GONE
-            drawerLayout.visibility = View.GONE
-            listLayout.visibility = View.GONE
-            carLayout.visibility = View.GONE
-            splashLayout.visibility = View.GONE
-            listFriendLayout.visibility = View.GONE
+            switchFrame(homeLayout,friendLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,carLayout)
 
-            homeLayout.bringToFront()
-            homeLayout.visibility = View.VISIBLE
         }
+        val notificaionId = jsonNotifIdRemind.get(owner)
+        notificationManager.cancel(notificaionId as Int);
         showCar()
         finish()
     }
@@ -65,10 +60,10 @@ class RemindTimer : AppCompatActivity() {
         val inflater: LayoutInflater = this.layoutInflater
         val dialogView: View = inflater.inflate(R.layout.dialog_car_view, null)
 
-        var txtName :TextView = dialogView.findViewById(R.id.car_name_txt)
-        var address : TextView = dialogView.findViewById(R.id.carAddressValue)
-        var timer : TimePicker = dialogView.findViewById(R.id.timePickerView)
-        var remindButton : Button = dialogView.findViewById(R.id.remindButton)
+        val txtName :TextView = dialogView.findViewById(R.id.car_name_txt)
+        val address : TextView = dialogView.findViewById(R.id.carAddressValue)
+        val timer : TimePicker = dialogView.findViewById(R.id.timePickerView)
+        val remindButton : Button = dialogView.findViewById(R.id.remindButton)
         var key = ""
         val id = account?.email?.replace("@gmail.com","")
 
@@ -77,7 +72,7 @@ class RemindTimer : AppCompatActivity() {
             myCar.getJSONObject(key).put("timer",timer.hour*60 + timer.minute)
             println(myCar.getJSONObject(key))
             alertDialog.dismiss()
-            reminderAuto(myCar.getJSONObject(key))
+            resetTimerAuto(myCar.getJSONObject(key))
 
         }
         for (i in myCar.keys()){
