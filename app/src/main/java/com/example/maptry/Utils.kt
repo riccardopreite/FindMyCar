@@ -39,13 +39,14 @@ var jsonNotifId = JSONObject()
 var notificationJson = JSONObject()
 var newFriendJson = JSONObject()
 
-fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout, toGone3: FrameLayout, toGone4: FrameLayout,toGone5: FrameLayout,toGone6: FrameLayout){
+fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout, toGone3: FrameLayout, toGone4: FrameLayout,toGone5: FrameLayout,toGone6: FrameLayout,toGone7: FrameLayout){
     toGone1.invalidate()
     toGone2.invalidate()
     toGone3.invalidate()
     toGone4.invalidate()
     toGone5.invalidate()
     toGone6.invalidate()
+    toGone7.invalidate()
 
     toView.visibility = View.VISIBLE
     toGone1.visibility = View.GONE
@@ -54,6 +55,7 @@ fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout,
     toGone4.visibility = View.GONE
     toGone5.visibility = View.GONE
     toGone6.visibility = View.GONE
+    toGone7.visibility = View.GONE
 
     toView.startAnimation(mAnimation)
     mAnimation.start()
@@ -85,7 +87,7 @@ fun createMarker(p0: LatLng): Marker? {
 
     var text = "Indirizzo:" + listAddr?.get(0)?.getAddressLine(0)+"\nGeoLocalita:" +  listAddr?.get(0)?.getLocality() + "\nAdminArea: " + listAddr?.get(0)?.getAdminArea() + "\nCountryName: " + listAddr?.get(0)?.getCountryName()+ "\nPostalCode: " + listAddr?.get(0)?.getPostalCode() + "\nFeatureName: " + listAddr?.get(0)?.getFeatureName();
 
-    var x= mMap.addMarker(
+    var x = mMap.addMarker(
         MarkerOptions()
             .position(p0)
             .title(text)

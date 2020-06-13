@@ -58,6 +58,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.dialog_friend_view.*
 import kotlinx.android.synthetic.main.nav_header_navigation.*
 import okhttp3.Callback
@@ -86,7 +87,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
 
     private var locationUpdateState = false
-    private var zoom = 1
     private var timer = Timer()
 
 
@@ -108,8 +108,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
                 val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
                 val carLayout: FrameLayout = findViewById(R.id.car_layout)
+                val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
-                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout,splashLayout,carLayout)
+                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout,splashLayout,carLayout,liveLayout)
                 mainHandler.removeCallbacksAndMessages(null);
             }
             else {
@@ -152,7 +153,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     companion object {
         var isRunning : Boolean = false
         lateinit var firebaseAuth: FirebaseAuth
-
+        var zoom = 1
 
         lateinit var context : Context
         lateinit var alertDialog: AlertDialog
@@ -268,19 +269,23 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val friendLayout: FrameLayout = findViewById(id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(id.friendFrame)
         val carLayout: FrameLayout = findViewById(id.car_layout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+
         mAnimation = AnimationUtils.loadAnimation(this, R.anim.enlarge);
         mAnimation.backgroundColor = Color.TRANSPARENT;
-        switchFrame(splashLayout,drawerLayout,listLayout,homeLayout,friendLayout,friendRequestLayout,carLayout)
+        switchFrame(splashLayout,drawerLayout,listLayout,homeLayout,friendLayout,friendRequestLayout,carLayout,liveLayout)
 
 
 
         mainHandler = Handler(Looper.getMainLooper())
 
         mainHandler.post(run)
+
         val menuIntent : Intent=  Intent(this,LoginActivity::class.java)
         val component : ComponentName = ComponentName(this,LoginActivity::class.java)
         intent.component = component
         startActivityForResult(menuIntent,40);
+
         val displayMetrics = DisplayMetrics()
 
         windowManager.defaultDisplay.getMetrics(displayMetrics)
@@ -292,8 +297,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
                 super.onLocationResult(p0)
-                println("porcodio")
-                println(p0)
                 if (zoom == 1) {
                     mMap.moveCamera(
                         CameraUpdateFactory.newLatLngZoom(
@@ -305,27 +308,18 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                     )
                 }
                 if(zoom == 0) {
-                    var mark: Marker = mymarker.get(
-                        LatLng(
-                            lastLocation.latitude,
-                            lastLocation.longitude
-                        ).toString()
-                    ) as Marker
-                    mark.remove()
-                    mymarker.remove(LatLng(lastLocation.latitude, lastLocation.longitude).toString())
-                }
-
-
+                     val mark: Marker = mymarker.get(
+                         LatLng(lastLocation.latitude, lastLocation.longitude).toString()
+                     ) as Marker
+                     mark.remove()
+                     mymarker.remove(LatLng(lastLocation.latitude, lastLocation.longitude).toString())
+                 }
                 lastLocation = p0.lastLocation
-
                 createMarker(LatLng(lastLocation.latitude, lastLocation.longitude))
                 zoom = 0
             }
         }
-
         createLocationRequest()
-
-
     }
 
 
@@ -375,6 +369,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
         if (homeLayout.visibility == View.GONE) {
             routebutton.text = "Visualizza"
@@ -387,7 +382,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         ), 20F
                     )
                 )
-                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
+                switchFrame(homeLayout,listLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout,liveLayout)
                 alertDialog.dismiss()
             }
         }
@@ -779,7 +774,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                     val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
                     val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
                     val carLayout: FrameLayout = findViewById(R.id.car_layout)
-                    switchFrame(drawerLayout, listLayout, homeLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
+                    val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+
+                    switchFrame(drawerLayout, listLayout, homeLayout,friendLayout,friendRequestLayout,carLayout,splashLayout,liveLayout)
                 })
                 user.visibility = View.VISIBLE
                 user.text = account?.displayName
@@ -841,6 +838,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
     public override fun onResume() {
         super.onResume()
+        isRunning = true
         if (!locationUpdateState) {
             startLocationUpdates()
         }
@@ -863,13 +861,11 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 return true
             }
             id.car ->{
-                //to show the car?
                 showCar()
                 return true
             }
             id.live ->{
-                //to show the live event?
-                Toast.makeText(applicationContext, "live da implementare", Toast.LENGTH_LONG).show()
+                showLive()
                 return true
             }
             else -> super.onOptionsItemSelected(item)
@@ -971,22 +967,10 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        drawerLayout.invalidate()
-        listLayout.invalidate()
-        carLayout.invalidate()
-        splashLayout.invalidate()
-        listFriendLayout.invalidate()
-        friendLayout.invalidate()
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
-        friendLayout.visibility = View.GONE
-        drawerLayout.visibility = View.GONE
-        listLayout.visibility = View.GONE
-        carLayout.visibility = View.GONE
-        splashLayout.visibility = View.GONE
-        listFriendLayout.visibility = View.GONE
+        switchFrame(homeLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,friendLayout,carLayout,liveLayout)
 
-        homeLayout.bringToFront()
-        homeLayout.visibility = View.VISIBLE
     }
 
     @SuppressLint("WrongViewCast")
@@ -1002,7 +986,9 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        switchFrame(listLayout,homeLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+
+        switchFrame(listLayout,homeLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout,liveLayout)
 
 
         var  lv:ListView = findViewById<ListView>(R.id.lv)
@@ -1110,7 +1096,53 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         lv.adapter = arrayAdapter;
     }
 
+    fun showLive(){
+        val len = myLive.length()
+        var index = 0
+        val txt: TextView = findViewById(R.id.nolive)
 
+        val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
+        val listLayout: FrameLayout = findViewById(R.id.list_layout)
+        val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
+        val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+        switchFrame(liveLayout,listLayout,homeLayout,drawerLayout,friendLayout,friendRequestLayout,carLayout,splashLayout)
+
+        println(myLive)
+        var  lv:ListView = findViewById<ListView>(R.id.lvLive)
+        val userList = MutableList<String>(len,{""})
+        if(len == 0) txt.visibility = View.VISIBLE;
+        else txt.visibility = View.INVISIBLE;
+        for (i in myLive.keys()){
+            userList[index] = myLive.getJSONObject(i).get("name") as String
+            index++
+        }
+
+
+        var  arrayAdapter : ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, userList);
+
+
+        mMap.clear()
+        for(i in mymarker.keys()){
+            var marker : Marker = mymarker[i] as Marker
+            mMap.addMarker( MarkerOptions()
+                .position(marker.position)
+                .title(marker.title)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .alpha(0.7f)    )
+        }
+
+        lv.setOnItemClickListener { parent, view, position, id ->
+            val selectedItem = parent.getItemAtPosition(position) as String
+            for (i in myLive.keys()){
+                if(selectedItem == myLive.getJSONObject(i).get("name") as String) onMarkerClick(mymarker[i] as Marker)
+            }
+        }
+        lv.adapter = arrayAdapter;
+    }
 
     @SuppressLint("ShowToast")
     private fun showFriend(){
@@ -1127,7 +1159,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout,liveLayout)
 
 
         var  lv:ListView = findViewById<ListView>(R.id.fv)
@@ -1291,7 +1324,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                                             )
                                         )
 
-                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout)
+                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout,liveLayout)
                                         alertDialog2.dismiss()
                                         showPOIPreferences(pos.toString(),inflater,context,mark!!)
                                     }
@@ -1348,7 +1381,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,liveLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.lvCar)

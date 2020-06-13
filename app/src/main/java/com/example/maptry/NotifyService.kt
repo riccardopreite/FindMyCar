@@ -110,6 +110,10 @@ class NotifyService : Service() {
         }
 
         private fun startService() {
+            val CHANNEL_ID =
+                "findMyCarChannel"
+            val name: CharSequence =
+                "findMyCar"
             if (isServiceStarted) return
             println("Starting the foreground service task")
             isServiceStarted = true
@@ -133,7 +137,6 @@ class NotifyService : Service() {
                             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         var idDB = MapsActivity.account?.email?.replace("@gmail.com", "")
                         if (idDB != null) {
-                            println("ID NON NULL IN NOTIFICATION")
                             //Listner for live marker
                             MapsActivity.db.collection("user").document(idDB).collection("live")
                                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -148,15 +151,11 @@ class NotifyService : Service() {
                                         MapsActivity.dataFromfirestore = querySnapshot.documents
 
                                         Log.d("TAG", "Current data: ${querySnapshot.documents}")
-                                        println("CIAOOOO in live")
                                         querySnapshot.documents.forEach { child ->
                                             var json = JSONObject()
                                             child.data?.forEach { chi ->
-                                                println(chi.key)
-                                                println(chi.value)
                                                 json = JSONObject(chi.value as HashMap<*, *>)
-                                                val CHANNEL_ID =
-                                                    "my_channel_01"
+
                                                 val nm =
                                                     context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                                                 val notification =
@@ -171,7 +170,6 @@ class NotifyService : Service() {
                                                             setSmallIcon(R.drawable.ic_addfriend)
                                                             setAutoCancel(true)
 //                            setSmallIcon(R.drawable.ic_launcher_foreground)
-                                                            if(isRunning){
 
                                                                 val showLiveEvent: Intent =
                                                                     Intent(
@@ -205,9 +203,8 @@ class NotifyService : Service() {
                                                                         FLAG_UPDATE_CURRENT
                                                                     )
                                                                 )
-                                                            }
-                                                            else{
-                                                                println("IS RUNNING E FALSE")
+
+                                                          /*  else{
                                                                 val intent = Intent(
                                                                     context,
                                                                     MapsActivity::class.java
@@ -255,15 +252,13 @@ class NotifyService : Service() {
                                                                         FLAG_UPDATE_CURRENT
                                                                     )
                                                                 setContentIntent(pendingIntent)
-                                                            }
+                                                            }*/
 
 
                                                             priority =
                                                                 NotificationCompat.PRIORITY_DEFAULT
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                println("create channel")
-                                                                val name: CharSequence =
-                                                                    "Channel prova"// The user-visible name of the channel.
+
                                                                 val importance =
                                                                     NotificationManager.IMPORTANCE_HIGH
                                                                 val mChannel = NotificationChannel(
@@ -300,19 +295,13 @@ class NotifyService : Service() {
                                             "TAGnotify",
                                             "Current data: ${querySnapshot.documents}"
                                         )
-                                        println("CIAOOOOnotify")
                                         querySnapshot.documents.forEach { child ->
                                             child.data?.forEach {    chi ->
                                                 var notificationId = Math.abs(System.nanoTime().toInt())
-                                                println(chi.key)
-                                                println(chi.value)
                                                 jsonNotifIdFriendRequest.put(
                                                     chi.value as String,
                                                     notificationId
                                                 )
-//                                                notificationJson.put(chi.key, chi.value)
-                                                val CHANNEL_ID =
-                                                    "my_channel_01"
                                                 notification =
                                                     NotificationCompat.Builder(context, "first").apply {
                                                         setContentTitle("Richiesta d'amicizia")
@@ -322,7 +311,6 @@ class NotifyService : Service() {
                                                         setSmallIcon(R.drawable.ic_addfriend)
                                                         setAutoCancel(true) //collegato a tap notification
 
-                                                        if(isRunning){
 
                                                             val notificationClickIntent: Intent =
                                                                 Intent(
@@ -346,9 +334,8 @@ class NotifyService : Service() {
                                                                     FLAG_UPDATE_CURRENT
                                                                 )
                                                             )
-                                                        }
-                                                        else{
-                                                            println("IS RUNNING E FALSE")
+
+                                                       /* else{
                                                             val intent = Intent(
                                                                 context,
                                                                 MapsActivity::class.java
@@ -384,7 +371,7 @@ class NotifyService : Service() {
                                                                     FLAG_UPDATE_CURRENT
                                                                 )
                                                             setContentIntent(pendingIntent)
-                                                        }
+                                                        }*/
 
 
                                                         priority = NotificationCompat.PRIORITY_DEFAULT
@@ -433,9 +420,6 @@ class NotifyService : Service() {
                                                             declinePendingIntent
                                                         )
                                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                            println("create channel")
-                                                            val name: CharSequence =
-                                                                "Channel prova"// The user-visible name of the channel.
                                                             val importance =
                                                                 NotificationManager.IMPORTANCE_HIGH
                                                             val mChannel = NotificationChannel(
@@ -474,12 +458,8 @@ class NotifyService : Service() {
                                             "TAGnotify",
                                             "Current data: ${querySnapshot.documents}"
                                         )
-                                        println("CIAOOOOnotify")
                                         querySnapshot.documents.forEach { child ->
                                             child.data?.forEach { chi ->
-                                                        val CHANNEL_ID =
-                                                            "my_channel_01"
-                                                        println("PREPARE NOTIFICATION")
                                                         val string = "Tu e " + chi.value + " ora siete Amici!"
                                                         notification =
                                                             NotificationCompat.Builder(context, "first").apply {
@@ -489,8 +469,6 @@ class NotifyService : Service() {
                                                                 setSmallIcon(R.drawable.ic_accessibility)
                                                                 setAutoCancel(true) //collegato a tap notification
 
-                                                                if(isRunning){
-                                                                    println("IS RUNNING E TRUE")
                                                                     val notificationClickIntent: Intent =
                                                                         Intent(
                                                                             context,
@@ -504,9 +482,8 @@ class NotifyService : Service() {
                                                                             FLAG_UPDATE_CURRENT
                                                                         )
                                                                     )
-                                                                }
-                                                                else{
-                                                                    println("IS RUNNING E FALSE")
+
+                                                                /*else{
                                                                     val intent = Intent(
                                                                         context,
                                                                         MapsActivity::class.java
@@ -534,15 +511,12 @@ class NotifyService : Service() {
                                                                             FLAG_UPDATE_CURRENT
                                                                         )
                                                                     setContentIntent(pendingIntent)
-                                                                }
+                                                                }*/
 
 
                                                                 priority = NotificationCompat.PRIORITY_DEFAULT
 
                                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                    println("create channel")
-                                                                    val name: CharSequence =
-                                                                        "Channel prova"// The user-visible name of the channel.
                                                                     val importance =
                                                                         NotificationManager.IMPORTANCE_HIGH
                                                                     val mChannel = NotificationChannel(
@@ -582,26 +556,16 @@ class NotifyService : Service() {
                                             "TAGnotify",
                                             "Current data: ${querySnapshot.documents}"
                                         )
-                                        println("CIAOOOOnotify")
                                         querySnapshot.documents.forEach { child ->
 
 
                                             child.data?.forEach { chi ->
 
-                                                println("each child")
-                                                println(chi.key)
-                                                println(chi.value)
                                                 json = JSONObject(chi.value as HashMap<*, *>)
                                                 key =
                                                     json.get("owner") as String + json.get("name") as String
-                                                println("JSON")
                                                 var name = json.get("name") as String
                                                 var owner = json.get("owner") as String
-                                                println(json.getString("name"))
-                                                val CHANNEL_ID =
-                                                    "my_channel_01"
-                                                println("PREPARE NOTIFICATION")
-
 
                                                 jsonNotifIdRemind.put(
                                                     json.getString("owner"),
@@ -620,8 +584,6 @@ class NotifyService : Service() {
                                                             setSmallIcon(R.drawable.ic_car)
                                                             setAutoCancel(true) //collegato a tap notification
 
-                                                            if(isRunning){
-                                                                println("IS RUNNING E TRUE")
                                                                 val notificationClickIntent: Intent =
                                                                     Intent(context, ShowCar::class.java)
                                                                 notificationClickIntent.putExtra(
@@ -636,9 +598,7 @@ class NotifyService : Service() {
                                                                         FLAG_UPDATE_CURRENT
                                                                     )
                                                                 )
-                                                            }
-                                                            else{
-                                                                println("IS RUNNING E FALSE")
+                                                           /* else{
                                                                 val intent = Intent(
                                                                     context,
                                                                     MapsActivity::class.java
@@ -666,7 +626,7 @@ class NotifyService : Service() {
                                                                         FLAG_UPDATE_CURRENT
                                                                     )
                                                                 setContentIntent(pendingIntent)
-                                                            }
+                                                            }*/
 
 
 
@@ -675,8 +635,6 @@ class NotifyService : Service() {
                                                             //intent for open car
                                                             priority =
                                                                 NotificationCompat.PRIORITY_DEFAULT
-                                                            println("INTENT")
-                                                            println(name)
                                                             val acceptReminderIntent: Intent =
                                                                 Intent(
                                                                     context, /*ShowCar::class.java*/
@@ -706,9 +664,6 @@ class NotifyService : Service() {
                                                             )
 
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                println("create channel")
-                                                                val name: CharSequence =
-                                                                    "Channel prova"// The user-visible name of the channel.
                                                                 val importance =
                                                                     NotificationManager.IMPORTANCE_HIGH
                                                                 val mChannel = NotificationChannel(
@@ -751,27 +706,17 @@ class NotifyService : Service() {
                                             "TAGnotify",
                                             "Current data: ${querySnapshot.documents}"
                                         )
-                                        println("CIAOOOOnotify")
                                         querySnapshot.documents.forEach { child ->
 
 
                                             child.data?.forEach { chi ->
 
-                                                println("each child")
-                                                println(chi.key)
-                                                println(chi.value)
                                                 json = JSONObject(chi.value as HashMap<*, *>)
                                                 key =
                                                     json.get("owner") as String + json.get("name") as String
-                                                println("JSON")
                                                 val name = json.get("name") as String
                                                 val owner = json.get("owner") as String
                                                 val address = json.get("address") as String
-                                                println(json.getString("name"))
-                                                val CHANNEL_ID =
-                                                    "my_channel_01"
-                                                println("PREPARE NOTIFICATION")
-
                                                 //divide jsonNotify for each listner
 
                                                 jsonNotifIdExpired.put(
@@ -791,8 +736,7 @@ class NotifyService : Service() {
                                                             setSmallIcon(R.drawable.ic_car)
                                                             setAutoCancel(true) //collegato a tap notification
 
-                                                            if(isRunning){
-                                                                println("IS RUNNING E TRUE")
+
                                                                 val notificationClickIntent: Intent =
                                                                     Intent(context, ShowCar::class.java)
                                                                 notificationClickIntent.putExtra(
@@ -807,8 +751,8 @@ class NotifyService : Service() {
                                                                         FLAG_UPDATE_CURRENT
                                                                     )
                                                                 )
-                                                            }
-                                                            else{
+
+                                                            /*else{
                                                                 println("IS RUNNING E FALSE")
                                                                 val intent = Intent(
                                                                     context,
@@ -837,7 +781,7 @@ class NotifyService : Service() {
                                                                         FLAG_UPDATE_CURRENT
                                                                     )
                                                                 setContentIntent(pendingIntent)
-                                                            }
+                                                            }*/
 
 
 
@@ -846,8 +790,6 @@ class NotifyService : Service() {
                                                             //intent for open car
                                                             priority =
                                                                 NotificationCompat.PRIORITY_DEFAULT
-                                                            println("INTENT")
-                                                            println(name)
                                                             val acceptReminderIntent: Intent =
                                                                 Intent(
                                                                     context, /*ShowCar::class.java*/
@@ -908,9 +850,6 @@ class NotifyService : Service() {
                                                             )
 
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                println("create channel")
-                                                                val name: CharSequence =
-                                                                    "Channel prova"// The user-visible name of the channel.
                                                                 val importance =
                                                                     NotificationManager.IMPORTANCE_HIGH
                                                                 val mChannel = NotificationChannel(
@@ -956,36 +895,6 @@ class NotifyService : Service() {
 //            setServiceState(this, ServiceState.STOPPED)
             }
 
-//        private fun pingFakeServer() {
-//            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.mmmZ")
-//            val gmtTime = df.format(Date())
-//
-//            val deviceId = Settings.Secure.getString(applicationContext.contentResolver, Settings.Secure.ANDROID_ID)
-//
-//            val json =
-//                """
-//                {
-//                    "deviceId": "$deviceId",
-//                    "createdAt": "$gmtTime"
-//                }
-//            """
-//            try {
-//                Fuel.post("https://jsonplaceholder.typicode.com/posts")
-//                    .jsonBody(json)
-//                    .response { _, _, result ->
-//                        val (bytes, error) = result
-//                        if (bytes != null) {
-//                            println("[response bytes] ${String(bytes)}")
-//                        } else {
-//                            println("[response error] ${error?.message}")
-//                        }
-//                    }
-//            } catch (e: Exception) {
-//                println("Error making the request: ${e.message}")
-//            }
-//        }
-//
-//            @RequiresApi(Build.VERSION_CODES.N)
             private fun createNotification(): Notification {
                 notificationChannelId = "ENDLESS SERVICE CHANNEL"
 

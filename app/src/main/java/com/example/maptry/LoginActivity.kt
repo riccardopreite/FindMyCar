@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.*
+import com.example.maptry.MapsActivity.Companion.context
 import com.example.maptry.MapsActivity.Companion.firebaseAuth
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -16,6 +17,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlin.math.sign
 
 class LoginActivity : AppCompatActivity() {
 
@@ -45,7 +47,20 @@ class LoginActivity : AppCompatActivity() {
         user.visibility = View.GONE
         email.visibility = View.GONE
         close.visibility = View.GONE
-        configureGoogleSignIn()
+        var data : Intent = Intent();
+
+        data.data = Uri.parse("done");
+        if(GoogleSignIn.getLastSignedInAccount(this) != null) {
+            mGoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+            mGoogleSignInClient = GoogleSignIn.getClient(this, mGoogleSignInOptions)
+            account = GoogleSignIn.getLastSignedInAccount(this)
+            updateUI(account);
+            signIn()
+        }
+        else configureGoogleSignIn()
     }
     private fun configureGoogleSignIn() {
         mGoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

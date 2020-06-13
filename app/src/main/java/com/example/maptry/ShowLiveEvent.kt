@@ -1,14 +1,18 @@
 package com.example.maptry
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.example.maptry.MapsActivity.Companion.context
+import com.example.maptry.MapsActivity.Companion.isRunning
 import com.example.maptry.MapsActivity.Companion.mMap
 import com.example.maptry.MapsActivity.Companion.myList
 import com.example.maptry.MapsActivity.Companion.myLive
 import com.example.maptry.MapsActivity.Companion.mymarker
+import com.example.maptry.MapsActivity.Companion.zoom
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -61,10 +65,6 @@ class ShowLiveEvent: AppCompatActivity() {
         json.put("phone", "da implementare")
         myList.put(p0.toString(), json)
 
-        println(p0)
-        println("ARRIVATOO")
-
-
         mMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
                 p0, 20F
@@ -76,30 +76,16 @@ class ShowLiveEvent: AppCompatActivity() {
             mainHandler.postDelayed(object : Runnable {
                 override fun run() {
                     if(!done) {
-                        println("TIME TO REMOVEEEE")
-                        println(p0.toString())
-
                         val mark = mymarker[p0.toString()] as Marker
                         mymarker.remove(p0.toString())
                         mark.remove()
 
-                        println("removed?")
                         myLive.remove(p0.toString())
-                        println("myLive")
-                        println(myLive)
                         done = true
                     }
                     else mainHandler.postDelayed(this, exp)
                 }
             },exp)
-
-           // val x = Timer()
-          //  x.schedule(object : TimerTask() {
-          //      override fun run() {
-
-
-            //    }
-         //   },exp)
         }
 
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
@@ -109,8 +95,15 @@ class ShowLiveEvent: AppCompatActivity() {
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
-        switchFrame(homeLayout,friendLayout,listLayout,carLayout,drawerLayout,splashLayout,friendRequestLayout)
+        switchFrame(homeLayout,friendLayout,listLayout,carLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
+        if(!isRunning) {
+            val main = Intent(context,MapsActivity::class.java)
+            zoom = 1
+            startActivity(main)
+
+        }
         finish()
     }
 }

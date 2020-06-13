@@ -2,25 +2,32 @@ package com.example.maptry
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
-import com.example.maptry.MapsActivity
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
-import java.io.IOException
-import java.net.URL
-import java.net.URLEncoder
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.IOException
+import java.net.URL
+import java.net.URLEncoder
+import androidx.core.content.ContextCompat.getSystemService
+import com.example.maptry.MapsActivity.Companion.context
+import com.example.maptry.MapsActivity.Companion.isRunning
+import com.example.maptry.MapsActivity.Companion.zoom
+
 
 @SuppressLint("Registered")
 class ShowFriendList : AppCompatActivity() {
@@ -36,21 +43,36 @@ class ShowFriendList : AppCompatActivity() {
         val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
         val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
-        drawerLayout.invalidate()
-        listLayout.invalidate()
-        homeLayout.invalidate()
-        splashLayout.invalidate()
-        friendLayout.invalidate()
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
+        var closeDrawer :ImageView = findViewById(R.id.close_listfriend)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
-        drawerLayout.visibility = View.GONE
-        listLayout.visibility = View.GONE
-        homeLayout.visibility = View.GONE
-        splashLayout.visibility = View.GONE
-        friendLayout.visibility = View.GONE
+        switchFrame(listFriendLayout,homeLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout)
 
-        listFriendLayout.bringToFront()
-        listFriendLayout.visibility = View.VISIBLE
-        showFriendinActivity()
+        closeDrawer.setOnClickListener {
+            switchFrame(homeLayout,listFriendLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout)
+            if(!isRunning) {
+                val main = Intent(context,MapsActivity::class.java)
+                zoom = 1
+                startActivity(main)
+
+            }
+            finish()
+
+        }
+
+        // Return a list of the tasks that are currently running,
+        // with the most recent being first and older ones after in order.
+        // Taken 1 inside getRunningTasks method means want to take only
+        // top activity from stack and forgot the olders.
+
+
+        // Return a list of the tasks that are currently running,
+        // with the most recent being first and older ones after in order.
+        // Taken 1 inside getRunningTasks method means want to take only
+        // top activity from stack and forgot the olders.
+
+
         //finish()
     }
 
@@ -68,7 +90,9 @@ class ShowFriendList : AppCompatActivity() {
         val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
-        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+
+        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout,liveLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.fv)
@@ -229,7 +253,7 @@ class ShowFriendList : AppCompatActivity() {
                                                 ), 20F
                                             )
                                         )
-                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,carLayout,splashLayout)
+                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,carLayout,splashLayout,liveLayout)
                                         alertDialog2.dismiss()
                                         showPOIPreferences(pos.toString(),inflater,context,mark!!)
                                     }

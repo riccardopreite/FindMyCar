@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,7 +16,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.maptry.MapsActivity.Companion.account
 import com.example.maptry.MapsActivity.Companion.alertDialog
 import com.example.maptry.MapsActivity.Companion.context
+import com.example.maptry.MapsActivity.Companion.isRunning
 import com.example.maptry.MapsActivity.Companion.myCar
+import com.example.maptry.MapsActivity.Companion.zoom
 import com.example.maptry.NotifyService.Companion.jsonNotifIdRemind
 import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
@@ -46,13 +49,20 @@ class RemindTimer : AppCompatActivity() {
             val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
             val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
             val carLayout: FrameLayout = findViewById(R.id.car_layout)
+            val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
-            switchFrame(homeLayout,friendLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,carLayout)
+            switchFrame(homeLayout,friendLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,carLayout,liveLayout)
 
         }
         val notificaionId = jsonNotifIdRemind.get(owner)
         notificationManager.cancel(notificaionId as Int);
         showCar()
+        if(!isRunning) {
+            val main = Intent(context,MapsActivity::class.java)
+            zoom = 1
+            startActivity(main)
+
+        }
         finish()
     }
     private fun showCar(){

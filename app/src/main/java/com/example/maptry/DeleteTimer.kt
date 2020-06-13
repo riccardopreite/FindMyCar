@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.location.Address
 import android.os.Bundle
@@ -17,8 +18,10 @@ import com.example.maptry.MapsActivity.Companion.account
 import com.example.maptry.MapsActivity.Companion.alertDialog
 import com.example.maptry.MapsActivity.Companion.context
 import com.example.maptry.MapsActivity.Companion.geocoder
+import com.example.maptry.MapsActivity.Companion.isRunning
 import com.example.maptry.MapsActivity.Companion.listAddr
 import com.example.maptry.MapsActivity.Companion.myCar
+import com.example.maptry.MapsActivity.Companion.zoom
 import com.example.maptry.NotifyService.Companion.jsonNotifIdExpired
 import com.example.maptry.NotifyService.Companion.jsonNotifIdRemind
 import com.google.android.gms.maps.model.LatLng
@@ -70,6 +73,12 @@ class DeleteTimer : AppCompatActivity() {
 
        }
         notificationManager.cancel(notificaionId as Int)
+        if(!isRunning) {
+            val main = Intent(context,MapsActivity::class.java)
+            zoom = 1
+            startActivity(main)
+
+        }
         finish()
     }
 }

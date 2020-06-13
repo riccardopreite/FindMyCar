@@ -3,6 +3,7 @@ package com.example.maptry
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -14,7 +15,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import com.example.maptry.MapsActivity.Companion.account
 import com.example.maptry.MapsActivity.Companion.alertDialog
+import com.example.maptry.MapsActivity.Companion.context
+import com.example.maptry.MapsActivity.Companion.isRunning
 import com.example.maptry.MapsActivity.Companion.myCar
+import com.example.maptry.MapsActivity.Companion.zoom
 import com.google.android.material.snackbar.Snackbar
 
 class ShowCar : AppCompatActivity() {
@@ -36,14 +40,20 @@ class ShowCar : AppCompatActivity() {
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
 
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
 
         var close = findViewById<ImageView>(R.id.close_car)
         close.setOnClickListener {
 
-            switchFrame(homeLayout,carLayout,friendLayout,listLayout,drawerLayout,splashLayout,friendRequestLayout)
+            switchFrame(homeLayout,carLayout,friendLayout,listLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
+            if(!isRunning) {
+                val main = Intent(context,MapsActivity::class.java)
+                zoom = 1
+                startActivity(main)
 
+            }
             finish()
         }
 
@@ -68,7 +78,9 @@ class ShowCar : AppCompatActivity() {
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.lvCar)
