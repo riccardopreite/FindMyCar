@@ -2,6 +2,7 @@ package com.example.maptry
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -34,8 +35,8 @@ class ShowFriendRequest : AppCompatActivity() {
         val listFriendLayout: FrameLayout = findViewById(R.id.friend_layout)
         val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
-
-        switchFrame(friendLayout,drawerLayout,listLayout,homeLayout,splashLayout,listFriendLayout,carLayout,liveLayout)
+        val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        switchFrame(friendLayout,drawerLayout,listLayout,homeLayout,splashLayout,listFriendLayout,carLayout,liveLayout,loginLayout)
         var extras = intent?.extras
         var sender = extras?.get("sender") as String
         var receiver = extras?.get("receiver") as String
@@ -47,26 +48,48 @@ class ShowFriendRequest : AppCompatActivity() {
         var buttonDecline:Button = findViewById(R.id.cancelFriendRequest)
         buttonAccept.setOnClickListener {
             confirmFriend(sender,receiver)
-            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout,liveLayout)
+            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout,liveLayout,loginLayout)
+            println("RUNNING")
+            println(isRunning)
             if(!isRunning) {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1
                 startActivity(main)
-
             }
             finish()
         }
         buttonDecline.setOnClickListener {
-            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout,liveLayout)
+            switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout,liveLayout,loginLayout)
+            println("RUNNING")
+            println(isRunning)
             if(!isRunning) {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1
                 startActivity(main)
-
             }
             finish()
         }
 
+    }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+
+            onSaveInstanceState(MapsActivity.newBundy)
+        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+
+            onSaveInstanceState(MapsActivity.newBundy)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle("newBundy", MapsActivity.newBundy)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getBundle("newBundy")
     }
 
 }

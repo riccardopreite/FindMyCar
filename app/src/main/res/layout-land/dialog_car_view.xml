@@ -15,16 +15,17 @@
             android:id="@+id/content"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/headerattr"
+                android:id="@+id/header"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:ellipsize="end"
                 android:textColor="#000000"
                 android:textSize="17sp"
-                android:text="@string/header"
+                android:text="@string/car"
                 android:maxLines="3"
                 android:textAlignment="center"
                 android:layout_marginStart="20dp"
@@ -33,96 +34,94 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:id="@+id/car_rl"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/bottom_border">
 
-
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nome"
+                    android:id="@+id/car_name"
+                    android:textColor="#000000"
+                    android:layout_centerVertical="true"
+                    />
 
                 <TextView
+                    android:id="@+id/car_name_txt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/txt_addressattr"
+                    android:layout_toEndOf="@+id/car_name"
+                    android:backgroundTint="#000000"
+                    android:singleLine="false"
+                    android:autofillHints="" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bottom_border">
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+
                     android:textColor="#000000"
                     android:text="@string/address"
+                    android:id="@+id/carAddress"
+                    android:layout_centerVertical="true"
+
                     />
+                <TextView
+                    android:id="@+id/carAddressValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/carAddress"/>
             </RelativeLayout>
+
             <RelativeLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/bottom_border">
                 <TextView
-                    android:layout_width="150dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-
                     android:textColor="#000000"
-                    android:text="@string/phone"
-                    android:id="@+id/phone_content"
+                    android:text="@string/timer"
+                    android:id="@+id/timer"
                     android:layout_centerVertical="true"
 
                     />
-                <TextView
-                    android:layout_width="150dp"
+
+                <TimePicker android:id="@+id/timePickerView"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
-                    android:text="@string/notsetphone"
-                    android:id="@+id/phone_contentattr"
-                    android:layout_toEndOf="@+id/phone_content"
-                    android:layout_centerVertical="true"
+                    android:timePickerMode="spinner"
+                    android:layout_alignParentEnd="true"
                     />
             </RelativeLayout>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/uri_content"
-                android:padding="16dp"
-                android:background="@drawable/bottom_border">
 
-                <TextView
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/website"
-                    android:textColor="#000000"
-                    android:id="@+id/uri_lbl"
-                    android:layout_centerVertical="true"
-                    />
-                <TextView
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/noteseturi"
-                    android:textColor="#000000"
-                    android:id="@+id/uri_lblattr"
-                    android:layout_toEndOf="@+id/uri_lbl"
-                    android:layout_centerVertical="true"
-                    />
-            </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/routelayout"
-                android:layout_marginTop="32dp">
+                android:id="@+id/buttonFriendViewlayout"
+                android:layout_marginTop="16dp">
+
 
                 <Button
-                    android:id="@+id/removeBtnattr"
-                    android:layout_width="138dp"
-                    android:layout_height="34dp"
-                    android:layout_gravity="start"
-                    android:layout_marginStart="0dp"
-                    android:background="@drawable/layout_padding"
-                    android:drawableStart="@drawable/ic_add_blu"
-                    android:text="@string/share" />
-
-                <Button
-                    android:id="@+id/routeBtn"
-                    android:layout_width="138dp"
-                    android:layout_height="34dp"
-                    android:layout_alignEnd="@+id/removeBtnattr"
+                    android:id="@+id/remindButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="0dp"
-                    android:background="@drawable/layout_paddingroute"
-                    android:drawableStart="@drawable/ic_route_start_svgrepo_com"
-                    android:text="@string/route" />
+                    android:layout_gravity="end"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="34dp"
+                    android:background="#2196F3"
+                    android:text="@string/remind" />
             </RelativeLayout>
         </LinearLayout>
 

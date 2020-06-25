@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -46,11 +47,11 @@ class ShowFriendList : AppCompatActivity() {
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         var closeDrawer :ImageView = findViewById(R.id.close_listfriend)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
-
-        switchFrame(listFriendLayout,homeLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout)
+        val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        switchFrame(listFriendLayout,homeLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout,loginLayout)
 
         closeDrawer.setOnClickListener {
-            switchFrame(homeLayout,listFriendLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout)
+            switchFrame(homeLayout,listFriendLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout,loginLayout)
             if(!isRunning) {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1
@@ -91,8 +92,8 @@ class ShowFriendList : AppCompatActivity() {
         val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
-
-        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout,liveLayout)
+        val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        switchFrame(friendLayout,listLayout,homeLayout,drawerLayout,friendRequestLayout,splashLayout,carLayout,liveLayout,loginLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.fv)
@@ -253,7 +254,7 @@ class ShowFriendList : AppCompatActivity() {
                                                 ), 20F
                                             )
                                         )
-                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,carLayout,splashLayout,liveLayout)
+                                        switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,carLayout,splashLayout,liveLayout,loginLayout)
                                         alertDialog2.dismiss()
                                         showPOIPreferences(pos.toString(),inflater,context,mark!!)
                                     }
@@ -294,5 +295,25 @@ class ShowFriendList : AppCompatActivity() {
             //show friend
         }
         lv.adapter = arrayAdapter;
+    }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+
+            onSaveInstanceState(MapsActivity.newBundy)
+        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+
+            onSaveInstanceState(MapsActivity.newBundy)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle("newBundy", MapsActivity.newBundy)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getBundle("newBundy")
     }
 }

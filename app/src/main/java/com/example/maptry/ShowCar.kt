@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -41,13 +42,13 @@ class ShowCar : AppCompatActivity() {
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
-
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
+        val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout,loginLayout)
 
         var close = findViewById<ImageView>(R.id.close_car)
         close.setOnClickListener {
 
-            switchFrame(homeLayout,carLayout,friendLayout,listLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
+            switchFrame(homeLayout,carLayout,friendLayout,listLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout,loginLayout)
             if(!isRunning) {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1
@@ -79,13 +80,13 @@ class ShowCar : AppCompatActivity() {
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val friendRequestLayout: FrameLayout = findViewById(R.id.friend_layout)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
-
-        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout)
+        val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        switchFrame(carLayout,friendLayout,listLayout,homeLayout,drawerLayout,splashLayout,friendRequestLayout,liveLayout,loginLayout)
 
 
         var  lv: ListView = findViewById<ListView>(R.id.lvCar)
         val carList = MutableList<String>(len,{""})
-        val carListFull = MutableList<String>(len*4,{""})
+        val carListFull = MutableList<String>(len*10,{""})
         if(len == 0) txt.visibility = View.VISIBLE;
         else txt.visibility = View.INVISIBLE;
         println("CAR LIST")
@@ -236,6 +237,25 @@ class ShowCar : AppCompatActivity() {
         }
 
     }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
 
+            onSaveInstanceState(MapsActivity.newBundy)
+        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+
+            onSaveInstanceState(MapsActivity.newBundy)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle("newBundy", MapsActivity.newBundy)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getBundle("newBundy")
+    }
 
 }

@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import com.example.maptry.MapsActivity.Companion.alertDialog
 import com.example.maptry.MapsActivity.Companion.context
 import com.example.maptry.MapsActivity.Companion.isRunning
 import com.example.maptry.MapsActivity.Companion.myCar
+import com.example.maptry.MapsActivity.Companion.newBundy
 import com.example.maptry.MapsActivity.Companion.zoom
 import com.example.maptry.NotifyService.Companion.jsonNotifIdRemind
 import com.google.android.material.snackbar.Snackbar
@@ -50,19 +52,20 @@ class RemindTimer : AppCompatActivity() {
             val friendLayout: FrameLayout = findViewById(R.id.friendFrame)
             val carLayout: FrameLayout = findViewById(R.id.car_layout)
             val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+            val loginLayout: FrameLayout = findViewById(R.id.login_layout)
 
-            switchFrame(homeLayout,friendLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,carLayout,liveLayout)
+            switchFrame(homeLayout,friendLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,carLayout,liveLayout,loginLayout)
 
         }
         val notificaionId = jsonNotifIdRemind.get(owner)
         notificationManager.cancel(notificaionId as Int);
-        showCar()
         if(!isRunning) {
             val main = Intent(context,MapsActivity::class.java)
             zoom = 1
             startActivity(main)
-
         }
+        else showCar()
+
         finish()
     }
     private fun showCar(){
@@ -90,7 +93,7 @@ class RemindTimer : AppCompatActivity() {
             if(myCar.getJSONObject(i).get("name") as String == name){
                 key = i
                 txtName.text = name
-                address.text = myCar.getJSONObject(i).get("address") as String
+                address.text = myCar.getJSONObject(i).get("addr") as String
                 val time = (myCar.getJSONObject(i).get("timer").toString()).toInt()
                 val hour = time/60
                 val minute = time - hour*60
@@ -121,5 +124,27 @@ class RemindTimer : AppCompatActivity() {
             }
         }
     }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+
+            onSaveInstanceState(newBundy)
+        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+
+            onSaveInstanceState(newBundy)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle("newBundy", newBundy)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getBundle("newBundy")
+    }
+
 
 }

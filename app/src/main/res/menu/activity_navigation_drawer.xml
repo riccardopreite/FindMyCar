@@ -27,17 +27,9 @@
             android:icon="@drawable/ic_live"
             android:title="@string/live"
             app:showAsAction="always"/>
-        <item
-        android:id="@+id/help"
-        android:icon="@drawable/ic_help"
-        android:title="@string/help"/>
     </group>
     <group android:checkableBehavior="single"
         android:id="@+id/secondgroup">
 
-        <item
-            android:id="@+id/other"
-            android:icon="@drawable/ic_help"
-            android:title="@string/other_functionality"/>
     </group>
 </menu>

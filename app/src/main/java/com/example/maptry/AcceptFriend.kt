@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.content.res.Configuration
+import android.os.Bundle
 import com.example.maptry.NotifyService.Companion.jsonNotifIdFriendRequest
 
 class AcceptFriend : BroadcastReceiver() {
@@ -19,4 +21,6 @@ class AcceptFriend : BroadcastReceiver() {
         notificationManager.cancel(notificaionId as Int);
         confirmFriend(sender,receiver)
     }
+
+
 }

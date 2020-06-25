@@ -1,20 +1,32 @@
 package com.example.maptry
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.core.app.ActivityCompat
+import com.example.maptry.MapsActivity.Companion.REQUEST_LOCATION_PERMISSION
 import com.example.maptry.MapsActivity.Companion.context
 import com.example.maptry.MapsActivity.Companion.firebaseAuth
+import com.example.maptry.MapsActivity.Companion.locationCallback
+import com.example.maptry.MapsActivity.Companion.mLocationRequest
+import com.example.maptry.MapsActivity.Companion.newBundy
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlin.math.sign
@@ -23,24 +35,34 @@ class LoginActivity : AppCompatActivity() {
 
     //Login
     val RC_SIGN_IN: Int = 1
-     lateinit var mGoogleSignInClient: GoogleSignInClient
+    lateinit var mGoogleSignInClient: GoogleSignInClient
     lateinit var mGoogleSignInOptions: GoogleSignInOptions
 
     private var account: GoogleSignInAccount? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_maps)
 
-        println("IN LOGIN ACTIVITY")
-        setContentView(R.layout.nav_header_navigation)
-//        var google_button = findViewById<SignInButton>(R.id.google_button)
+        val x = findViewById<NavigationView>(R.id.nav_view).getHeaderView(0)
         var google_button = findViewById<Button>(R.id.google_button)
-        var imageView = findViewById<ImageView>(R.id.imageView)
-        var user = findViewById<TextView>(R.id.user)
-        var email = findViewById<TextView>(R.id.email)
-        var close = findViewById<ImageView>(R.id.close)
-//      var google_button = x.findViewById<SignInButton>(R.id.google_button)
-        firebaseAuth = FirebaseAuth.getInstance()
+        var close = x.findViewById<ImageView>(R.id.close)
 
+        var imageView = x.findViewById<ImageView>(R.id.imageView)
+        var user = x.findViewById<TextView>(R.id.user)
+        var email = x.findViewById<TextView>(R.id.email)
+
+        val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
+        val listLayout: FrameLayout = findViewById(R.id.list_layout)
+        val homeLayout: FrameLayout = findViewById(R.id.homeframe)
+        val splashLayout: FrameLayout = findViewById(R.id.splashFrame)
+        val friendLayout: FrameLayout = findViewById(R.id.friend_layout)
+        val friendRequestLayout: FrameLayout = findViewById(R.id.friendFrame)
+        val carLayout: FrameLayout = findViewById(R.id.car_layout)
+        val liveLayout: FrameLayout = findViewById(R.id.live_layout)
+        val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        switchFrame(loginLayout,drawerLayout, homeLayout,friendLayout,friendRequestLayout,carLayout,splashLayout,liveLayout,listLayout)
+
+        firebaseAuth = FirebaseAuth.getInstance()
 
         google_button.visibility = View.VISIBLE
         imageView.visibility = View.GONE
@@ -50,17 +72,15 @@ class LoginActivity : AppCompatActivity() {
         var data : Intent = Intent();
 
         data.data = Uri.parse("done");
-        if(GoogleSignIn.getLastSignedInAccount(this) != null) {
-            mGoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
-            mGoogleSignInClient = GoogleSignIn.getClient(this, mGoogleSignInOptions)
-            account = GoogleSignIn.getLastSignedInAccount(this)
-            updateUI(account);
-            signIn()
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            requestPermissions()
         }
-        else configureGoogleSignIn()
+        else{
+            startAccount()
+        }
+
+
     }
     private fun configureGoogleSignIn() {
         mGoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -70,8 +90,6 @@ class LoginActivity : AppCompatActivity() {
         mGoogleSignInClient = GoogleSignIn.getClient(this, mGoogleSignInOptions)
          account = GoogleSignIn.getLastSignedInAccount(this)
         updateUI(account);
-//        findViewById<SignInButton>(R.id.google_button).setOnClickListener { signIn() }
-
         findViewById<Button>(R.id.google_button).setOnClickListener { signIn() }
     }
 
@@ -79,47 +97,20 @@ class LoginActivity : AppCompatActivity() {
     /*Start SignIn Function*/
     fun signIn() {
         var signInIntent : Intent = mGoogleSignInClient.signInIntent;
-        println("IN SIGNINNNNNN")
         println(signInIntent)
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     private fun updateUI( account: GoogleSignInAccount?){
         if(account != null){
-//            var google_button = findViewById<SignInButton>(R.id.google_button)
-//            var imageView = findViewById<ImageView>(R.id.imageView)
-//            var user = findViewById<TextView>(R.id.user)
-//            var email =findViewById<TextView>(R.id.email)
-//            google_button.visibility = View.GONE
-//
-//            imageView.visibility = View.VISIBLE
-////            imageView.setImageIcon(account.photoUrl as Icon)
-//
-//            user.visibility = View.VISIBLE
-//            user.text = account.displayName
-//
-//            email.visibility = View.VISIBLE
-//            email.text = account.email
             var data : Intent = Intent();
-
             data.data = Uri.parse("done");
             setResult(50, data);
-            //---close the activity---
-//            finish();
 
         }else {
             var data : Intent = Intent();
-
             data.data = Uri.parse("Not logged");
             setResult(60, data);
-//            var google_button = findViewById<SignInButton>(R.id.google_button)
-//            var imageView = findViewById<ImageView>(R.id.imageView)
-//            var user = findViewById<TextView>(R.id.user)
-//            var email =findViewById<TextView>(R.id.email)
-//            google_button.visibility = View.VISIBLE
-//            imageView.visibility = View.GONE
-//            user.visibility = View.GONE
-//            email.visibility = View.GONE
         }
     }
 
@@ -127,11 +118,8 @@ class LoginActivity : AppCompatActivity() {
         try {
             account  = completedTask.getResult(ApiException::class.java)
             account?.let { firebaseAuthWithGoogle(it) }
-            // Signed in successfully, show authenticated UI.
             account?.let { updateUI(it) };
         } catch (e: ApiException) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w("INFAIL", "signInResult:failed code=" + e.getStatusCode());
             updateUI(null);
         }
@@ -142,16 +130,43 @@ class LoginActivity : AppCompatActivity() {
         firebaseAuth.signInWithCredential(credential).addOnCompleteListener {
             if (it.isSuccessful) {
                 this.finish()
-
             } else {
-                Toast.makeText(this, "Google sign in failed3:(", Toast.LENGTH_LONG).show()
+                configureGoogleSignIn()
+                signIn()
             }
+        }
+    }
+
+    private fun startAccount(){
+        if(Build.VERSION.SDK_INT >= 23 && checkPermission()) {
+            MapsActivity.mMap.isMyLocationEnabled = true
+            LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(
+                mLocationRequest, locationCallback, Looper.myLooper())
+        }
+        if(GoogleSignIn.getLastSignedInAccount(this) != null) {
+            account = GoogleSignIn.getLastSignedInAccount(this)
+            account?.let { firebaseAuthWithGoogle(it) }
+            // Signed in successfully, show authenticated UI.
+            account?.let { updateUI(it) };
+        }
+        else{
+            configureGoogleSignIn()
+            signIn()
+        }
+    }
+
+    fun checkPermission() : Boolean {
+        return if (ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            true
+        } else {
+            requestPermissions()
+            false
         }
     }
 
 /*End SignIn Function*/
 
-    public final fun get(): GoogleSignInAccount? {
+    fun get(): GoogleSignInAccount? {
         return this.account
     }
 
@@ -159,15 +174,49 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
             var task:Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
     }
     override fun onBackPressed() { }
+
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+            REQUEST_LOCATION_PERMISSION)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == 1) {
+            if (permissions[0] == android.Manifest.permission.ACCESS_FINE_LOCATION ) {
+                startAccount()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+
+            onSaveInstanceState(newBundy)
+        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+
+            onSaveInstanceState(newBundy)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle("newBundy", newBundy)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getBundle("newBundy")
+    }
+
 /*End Override Function*/
 }
