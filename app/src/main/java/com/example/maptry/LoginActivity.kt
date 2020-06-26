@@ -29,6 +29,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import java.lang.Exception
 import kotlin.math.sign
 
 class LoginActivity : AppCompatActivity() {
@@ -139,9 +140,13 @@ class LoginActivity : AppCompatActivity() {
 
     private fun startAccount(){
         if(Build.VERSION.SDK_INT >= 23 && checkPermission()) {
-            MapsActivity.mMap.isMyLocationEnabled = true
-            LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(
-                mLocationRequest, locationCallback, Looper.myLooper())
+            try {
+                MapsActivity.mMap.isMyLocationEnabled = true
+                LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(
+                    mLocationRequest, locationCallback, Looper.myLooper()
+                )
+            }
+            catch (e:Exception){}
         }
         if(GoogleSignIn.getLastSignedInAccount(this) != null) {
             account = GoogleSignIn.getLastSignedInAccount(this)

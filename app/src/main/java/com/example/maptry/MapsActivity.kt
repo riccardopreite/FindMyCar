@@ -1,6 +1,5 @@
 package com.example.maptry
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
@@ -13,6 +12,7 @@ import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
 import android.os.*
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,12 +21,12 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.view.get
 import com.example.maptry.R.id
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.*
@@ -37,27 +37,25 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.android.material.internal.ContextUtils.getActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.functions.FirebaseFunctions
 import com.squareup.picasso.Picasso
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.eclipse.paho.android.service.MqttAndroidClient
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -97,6 +95,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     }
 
     companion object {
+        var builder = LocationSettingsRequest.Builder()
         lateinit var locationCallback: LocationCallback
         var newBundy = Bundle()
         var mLocationRequest: LocationRequest? = null
@@ -142,8 +141,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
 
         // initialize location setting request builder object
-        val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
+        builder.setAlwaysShow(true)
         val locationSettingsRequest = builder.build()
 
         // initialize location service object
@@ -261,6 +260,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
 
 
+    @SuppressLint("RestrictedApi")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setOnMarkerClickListener(this)
@@ -268,6 +268,62 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         startLocationUpdates()
         setUpMap()
         setUpSearch()
+        mMap.setOnMyLocationButtonClickListener {
+
+            val provider: String = Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED
+            )
+
+            if (!provider.contains("gps")) { //if gps is disabled
+                val result: Task<LocationSettingsResponse> =
+                    getActivity(context)?.let {
+                        LocationServices.getSettingsClient(it)
+                            .checkLocationSettings(builder.build())
+                    } as Task<LocationSettingsResponse>
+
+
+
+                result.addOnCompleteListener { task ->
+                    try {
+                        val response: LocationSettingsResponse? =
+                            task.getResult(ApiException::class.java)
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+                    } catch (exception: ApiException) {
+                        when (exception.getStatusCode()) {
+                            LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->                             // Location settings are not satisfied. But could be fixed by showing the
+                                // user a dialog.
+                                try {
+                                    // Cast to a resolvable exception.
+                                    val resolvable: ResolvableApiException =
+                                        exception as ResolvableApiException
+                                    // Show the dialog by calling startResolutionForResult(),
+                                    // and check the result in onActivityResult().
+                                    resolvable.startResolutionForResult(
+                                        getActivity(context),
+                                        LocationRequest.PRIORITY_HIGH_ACCURACY
+                                    )
+                                } catch (e: IntentSender.SendIntentException) {
+                                    // Ignore the error.
+                                } catch (e: ClassCastException) {
+                                    // Ignore, should be an impossible error.
+                                }
+                            LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                try{
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lastLocation.latitude,lastLocation.longitude), 20F))
+                }
+                catch (e:Exception){}
+            }
+            return@setOnMyLocationButtonClickListener true
+        }
+
     }
 
     /*End Initialize Function*/
@@ -780,6 +836,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+
+
     /*End Override Function*/
 
     /*Start Utils Function*/
@@ -817,9 +875,12 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
         val loginLayout: FrameLayout = findViewById(R.id.login_layout)
-        reDraw()
+
         if(drawerLayout.visibility == View.GONE) switchFrame(drawerLayout,homeLayout,listLayout,splashLayout,listFriendLayout,friendLayout,carLayout,liveLayout,loginLayout)
-        else switchFrame(homeLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,friendLayout,carLayout,liveLayout,loginLayout)
+        else {
+            reDraw()
+            switchFrame(homeLayout,drawerLayout,listLayout,splashLayout,listFriendLayout,friendLayout,carLayout,liveLayout,loginLayout)
+        }
     }
 
     @SuppressLint("WrongViewCast")
@@ -881,6 +942,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
                                 id?.let { it1 ->
                                     myList.put(mark.position.toString(),removed)
+                                    mymarker.put(mark.position.toString(),mark)
                                     writeNewPOI(it1,removed.get("name").toString(),removed.get("addr").toString(),removed.get("cont").toString(),removed.get("type").toString(),mark,"da implementare","da implementare")
                                     Toast.makeText(this,"undo" + selectedItem.toString(),Toast.LENGTH_LONG)
 
@@ -1019,7 +1081,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         AC = "Annulla"
                         var text = "Rimosso "+selectedItem
                         var id = account?.email?.replace("@gmail.com","")
-                        val snackbar = Snackbar.make(view, text, 2000)
+                        val snackbar = Snackbar.make(view, text, 5000)
                             .setAction(AC,View.OnClickListener {
 
                                 id?.let { it1 ->
@@ -1202,16 +1264,20 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 for(i in myCar.keys()){
                     if(selectedItem == myCar.getJSONObject(i).get("name") as String) {
                         var removed = myCar.getJSONObject(i)
+                        var mark = mymarker[i] as Marker
+                        mark.remove()
                         myCar.remove(i)
+                        mymarker.remove(i)
                         var key = i
                         var AC:String
                         AC = "Annulla"
                         var text = "Rimosso "+ selectedItem
                         var id = account?.email?.replace("@gmail.com","")
-                        val snackbar = Snackbar.make(view, text, 2000)
+                        val snackbar = Snackbar.make(view, text, 5000)
                             .setAction(AC,View.OnClickListener {
                                 id?.let { it1 ->
                                     myCar.put(key,removed)
+                                    mymarker.put(key,mark)
                                     Toast.makeText(this,"undo" + selectedItem.toString(), Toast.LENGTH_LONG)
                                     showCar()
                                 }

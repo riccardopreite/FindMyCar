@@ -1,2 +1,2 @@
-rootProject.name='Map try'
+rootProject.name='Find My Car'
 include ':app'
