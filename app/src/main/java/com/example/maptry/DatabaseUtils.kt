@@ -18,6 +18,8 @@ import com.google.android.gms.maps.model.MarkerOptions
 import org.json.JSONObject
 
 /*Start Database Function*/
+
+/*These function create and object from a Data Class and upload it to Firebase*/
 fun writeNewPOI(userId: String, name:String,addr:String,cont:String,type:String,marker:Marker,url:String,phone:String) {
     val user = UserMarker(name,addr,cont,type,marker.position.latitude.toString(),marker.position.longitude.toString(),url,phone)
     db.collection("user").document(userId).collection("marker").add(user).addOnSuccessListener {
@@ -51,6 +53,7 @@ fun writeNewCar(userId: String, name:String,addr:String,timer:String,owner:Strin
         }
 }
 
+// retrieve friends collection from Firebase
 fun createFriendList(id:String){
     var count = 0
     db.collection("user").document(id).collection("friend")
@@ -72,6 +75,7 @@ fun createFriendList(id:String){
         }
 }
 
+// retrieve poi collection from Firebase
 fun createPoiList(id:String){
     db.collection("user").document(id).collection("marker")
         .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -98,6 +102,8 @@ fun createPoiList(id:String){
             drawed = true
         }
 }
+
+// retrieve car collection from Firebase
 fun createCarList(id:String){
     db.collection("user").document(id).collection("car")
         .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -109,8 +115,6 @@ fun createCarList(id:String){
                 querySnapshot.documents.forEach { child ->
                     myjson = JSONObject()
                     child.data?.forEach { chi ->
-                        println(chi.key)
-                        println(chi.value)
                         myjson.put(chi.key, chi.value)
                     }
                     var pos: LatLng = LatLng(
@@ -127,10 +131,11 @@ fun createCarList(id:String){
             drawed = true
         }
 }
+
+// retrieve live collection from Firebase
 fun createLiveList(id:String){
     db.collection("user").document(id).collection("living")
         .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-            println("SONO ENTRATO IN MARKER FIREBASE")
             if (firebaseFirestoreException != null) {
                 Log.w("TAG", "Listen failed.", firebaseFirestoreException)
             }

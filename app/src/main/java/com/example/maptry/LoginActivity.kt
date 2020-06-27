@@ -61,6 +61,8 @@ class LoginActivity : AppCompatActivity() {
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
         val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        
+        // show login interface
         switchFrame(loginLayout,drawerLayout, homeLayout,friendLayout,friendRequestLayout,carLayout,splashLayout,liveLayout,listLayout)
 
         firebaseAuth = FirebaseAuth.getInstance()
@@ -74,35 +76,39 @@ class LoginActivity : AppCompatActivity() {
 
         data.data = Uri.parse("done");
 
+        // ask gps permission if not allowed yet
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             requestPermissions()
         }
         else{
+            // simply get last account
             startAccount()
         }
 
 
     }
     private fun configureGoogleSignIn() {
+        // set google key and prepare for sign in
         mGoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         mGoogleSignInClient = GoogleSignIn.getClient(this, mGoogleSignInOptions)
          account = GoogleSignIn.getLastSignedInAccount(this)
-        updateUI(account);
+        setResultLogin(account);
         findViewById<Button>(R.id.google_button).setOnClickListener { signIn() }
     }
 
 
     /*Start SignIn Function*/
     fun signIn() {
+        // intent to sign in
         var signInIntent : Intent = mGoogleSignInClient.signInIntent;
         println(signInIntent)
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private fun updateUI( account: GoogleSignInAccount?){
+    private fun setResultLogin( account: GoogleSignInAccount?){
         if(account != null){
             var data : Intent = Intent();
             data.data = Uri.parse("done");
@@ -118,11 +124,12 @@ class LoginActivity : AppCompatActivity() {
     private fun handleSignInResult( completedTask:Task<GoogleSignInAccount>) {
         try {
             account  = completedTask.getResult(ApiException::class.java)
+            // connection with firebase
             account?.let { firebaseAuthWithGoogle(it) }
-            account?.let { updateUI(it) };
+            account?.let { setResultLogin(it) };
         } catch (e: ApiException) {
             Log.w("INFAIL", "signInResult:failed code=" + e.getStatusCode());
-            updateUI(null);
+            setResultLogin(null);
         }
     }
 
@@ -141,6 +148,7 @@ class LoginActivity : AppCompatActivity() {
     private fun startAccount(){
         if(Build.VERSION.SDK_INT >= 23 && checkPermission()) {
             try {
+                //try to set up map location
                 MapsActivity.mMap.isMyLocationEnabled = true
                 LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(
                     mLocationRequest, locationCallback, Looper.myLooper()
@@ -152,7 +160,7 @@ class LoginActivity : AppCompatActivity() {
             account = GoogleSignIn.getLastSignedInAccount(this)
             account?.let { firebaseAuthWithGoogle(it) }
             // Signed in successfully, show authenticated UI.
-            account?.let { updateUI(it) };
+            account?.let { setResultLogin(it) };
         }
         else{
             configureGoogleSignIn()

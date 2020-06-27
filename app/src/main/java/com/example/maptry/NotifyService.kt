@@ -41,8 +41,6 @@ class NotifyService : Service() {
         private var isServiceStarted = false
 
         override fun onBind(intent: Intent): IBinder? {
-            println("Some component want to bind with the service")
-            // We don't provide binding, so return null
             return null
         }
 
@@ -82,9 +80,10 @@ class NotifyService : Service() {
             if (isServiceStarted) return
             println("Starting the foreground service task")
             isServiceStarted = true
+            // Ensures that the CPU is running, screen and keyboard backlight will be allowed to go off.
             wakeLock =
                 (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
+                        newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
                         acquire()
                     }
                 }
@@ -126,8 +125,6 @@ class NotifyService : Service() {
                                                             )
                                                             setSmallIcon(R.drawable.ic_live)
                                                             setAutoCancel(true)
-//                            setSmallIcon(R.drawable.ic_launcher_foreground)
-
                                                                 val showLiveEvent: Intent =
                                                                     Intent(
                                                                         context,

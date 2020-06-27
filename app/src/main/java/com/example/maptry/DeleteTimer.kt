@@ -61,19 +61,11 @@ class DeleteTimer : AppCompatActivity() {
         val location = (listAddr)?.get(0);
         val p0 = location?.latitude?.let { LatLng(it, location.longitude) }
 
-        println("NGIALOSTIU")
-        println(myCar)
-        println(name)
-
         for (i in myCar.keys()){
-            println(myCar.getJSONObject(i).get("name"))
-
             if(myCar.getJSONObject(i).get("name") as String == name){
                 myCar.remove(i)
                 myList.remove(i)
                 val mark = mymarker[i] as Marker
-                println("MARKER DELETE TIMER")
-                println(mark)
                 mark.remove()
                 mymarker.remove(i)
 

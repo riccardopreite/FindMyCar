@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import com.example.maptry.NotifyService.Companion.jsonNotifIdFriendRequest
 
+// decline friend request
 class DeclineFriend : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         var notificationManager: NotificationManager =

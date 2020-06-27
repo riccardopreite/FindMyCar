@@ -75,7 +75,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
     private var run = object : Runnable {
         override fun run() {
-            if(drawed) {
+            if(drawed) { // wait firebase to load JSON or 1.5 sec
                 val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
                 val listLayout: FrameLayout = findViewById(R.id.list_layout)
                 val homeLayout: FrameLayout = findViewById(R.id.homeframe)
@@ -119,7 +119,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         var mymarker = JSONObject() //marker
         val myList = JSONObject() // POI json
         val myCar = JSONObject() // car json
-        val myLive = JSONObject() // car json
+        val myLive = JSONObject() // live json
         lateinit var mAnimation : Animation
         lateinit var dataFromfirebase: DataSnapshot
         var account : GoogleSignInAccount? = null
@@ -160,6 +160,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             }
         }
     }
+    // move position marker
     private fun onLocationChanged(location: Location) {
 
         val x = LatLng(location.latitude, location.longitude)
@@ -190,6 +191,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
+    // init Map
     private fun setUpMap() {
         Places.initialize(applicationContext, getString(R.string.google_maps_key))
         val mapFragment =  supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -211,7 +213,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if(isRunning) {
-            println("SONO GIA RUNNATO")
             return
         }
         setContentView(R.layout.activity_maps)
@@ -243,6 +244,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
         mainHandler.post(run)
 
+        // start intent to log in user
         val menuIntent : Intent=  Intent(this,LoginActivity::class.java)
         val component : ComponentName = ComponentName(this,LoginActivity::class.java)
         intent.component = component
@@ -268,6 +270,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         startLocationUpdates()
         setUpMap()
         setUpSearch()
+        // override methode to ask to turn on GPS if is off or to move Camera if is off
         mMap.setOnMyLocationButtonClickListener {
 
             val provider: String = Settings.Secure.getString(
@@ -331,6 +334,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
     /*Start Map Function*/
 
+    /*This Function open a dialog with the information of the marker which was clicked*/
     override fun onMarkerClick(p0: Marker): Boolean {
 
         try {
@@ -429,6 +433,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         return false
     }
 
+    /*Open Dialog to create new POI in the position clicked*/
     @SuppressLint("SetTextI18n")
     override fun onMapClick(p0: LatLng) {
         val inflater: LayoutInflater = this.layoutInflater
@@ -483,7 +488,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
-
+            // show timepicker for car and live
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val type = parent?.getItemAtPosition(position) as String
                 if(type == "Macchina" || type == "Live"){
@@ -732,6 +737,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
         else if (requestCode == 40) {
             if (resultCode == 50) {
+                // user logged, init structure, create user in firebase if not exist
                 account = GoogleSignIn.getLastSignedInAccount(this@MapsActivity)
                 var id: String? = account?.email?.replace("@gmail.com", "")
                 isRunning = true
@@ -768,12 +774,14 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 val menuIcon: ImageView = layout.getChildAt(0) as ImageView
                 google_button.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
+                // load google photo
                 Picasso.get().load(account?.photoUrl).into(imageView)
                 Picasso.get()
                     .load(account?.photoUrl)
                     .transform(CircleTransform())
                     .resize(100, 100)
                     .into(menuIcon)
+                // init menu
                 menuIcon.setOnClickListener(View.OnClickListener() {
                     val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
                     val listLayout: FrameLayout = findViewById(R.id.list_layout)
@@ -842,6 +850,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
     /*Start Utils Function*/
 
+    // init autoComplete fragment to search address
     @SuppressLint("ResourceType")
     fun setUpSearch() {
         val autoCompleteFragment =
@@ -865,6 +874,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         })
     }
 
+    // show menu or home and reDraw all poi
     fun closeDrawer(view: View) {
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
@@ -883,6 +893,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    // populate ListView with poi list
     @SuppressLint("WrongViewCast")
     fun showPOI(){
         var index = 0
@@ -937,6 +948,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         AC = "Annulla"
                         var text = "Rimosso "+selectedItem.toString()
                         var id = account?.email?.replace("@gmail.com","")
+                        // create a Toast to undo the operation of removing
                         val snackbar = Snackbar.make(view, text, 5000)
                             .setAction(AC,View.OnClickListener {
 
@@ -954,6 +966,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         snackbarView.setBackgroundColor(Color.BLACK)
                         snackbar.show()
 
+                        //remove from db the poi
                         id?.let { it1 -> db.collection("user").document(it1).collection("marker").get()
                                .addOnSuccessListener { result ->
                                    for (document in result) {
@@ -996,6 +1009,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         lv.adapter = arrayAdapter;
     }
 
+    // populate ListView with live list
     fun showLive(){
         val len = myLive.length()
         var index = 0
@@ -1033,6 +1047,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         lv.adapter = arrayAdapter;
     }
 
+    // populate ListView with friend list
     @SuppressLint("ShowToast")
     private fun showFriend(){
         val len = friendJson.length()
@@ -1083,7 +1098,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         var id = account?.email?.replace("@gmail.com","")
                         val snackbar = Snackbar.make(view, text, 5000)
                             .setAction(AC,View.OnClickListener {
-
+                                // Toast to undo operation
                                 id?.let { it1 ->
                                     friendJson.put(key,removed)
                                     confirmFriend(id,removed)
@@ -1098,6 +1113,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         snackbarView.setBackgroundColor(Color.BLACK)
                         snackbar.show()
 
+                        // remove item from db
                         id?.let { it1 -> db.collection("user").document(it1).collection("friend").get()
                             .addOnSuccessListener { result ->
                                 for (document in result) {
@@ -1140,6 +1156,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
             var context = this
             txtName.text = selectedItem
+            // ask public friend's poi with a server call
             var url = URL("http://"+ ip+":3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
             var result = JSONObject()
             val client = OkHttpClient()
@@ -1161,12 +1178,14 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                 }
                 override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                     this@MapsActivity.runOnUiThread(Runnable {
+                        // retrieve results in a thread to read more time
                         try {
                             alertDialog2.show()
                             result = JSONObject(response.body()?.string()!!)
                             val length = result.length()
                             val markerList = MutableList<String>(length+1,{""})
                             var index = 1
+                            // add this empty item cause a bug with spinner, on init select the first item and trigger the onItemSelected
                             markerList[0] = ""
                             for(i in result.keys()){
                                 if(result.getJSONObject(i).get("type") as String == "Pubblico") {
@@ -1218,6 +1237,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
         lv.adapter = arrayAdapter;
     }
+
+    // populate ListView with car list
     private fun showCar(){
         val len = myCar.length()
         var index = 0
@@ -1275,6 +1296,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                         var id = account?.email?.replace("@gmail.com","")
                         val snackbar = Snackbar.make(view, text, 5000)
                             .setAction(AC,View.OnClickListener {
+                                // Toast to undo remove operation
                                 id?.let { it1 ->
                                     myCar.put(key,removed)
                                     mymarker.put(key,mark)
@@ -1301,6 +1323,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                                 Log.d("FAIL", "Error getting documents: ", exception)
                             }
                         }
+                        //remove from db
                         id?.let { it1 -> db.collection("user").document(it1).collection("car").get()
                             .addOnSuccessListener { result ->
                                 for (document in result) {
@@ -1373,6 +1396,8 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         }
         lv.adapter = arrayAdapter;
     }
+
+    //get email inserted to send a request via server
     fun addFriend(view: View) {
 
         val inflater: LayoutInflater = this.layoutInflater
