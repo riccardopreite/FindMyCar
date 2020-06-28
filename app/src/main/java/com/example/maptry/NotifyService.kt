@@ -92,7 +92,6 @@ class NotifyService : Service() {
                             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         var idDB = account?.email?.replace("@gmail.com", "")
                         if (idDB != null) {
-                            println("IN NOTIFYYYYY")
                             //Listner for live marker
                             db.collection("user").document(idDB).collection("live")
                                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -125,6 +124,7 @@ class NotifyService : Service() {
                                                             )
                                                             setSmallIcon(R.drawable.ic_live)
                                                             setAutoCancel(true)
+                                                            // set up intent for on click
                                                                 val showLiveEvent: Intent =
                                                                     Intent(
                                                                         context,
@@ -156,6 +156,8 @@ class NotifyService : Service() {
                                                                 )
                                                          priority =
                                                                 NotificationCompat.PRIORITY_DEFAULT
+
+                                                            // channel for android O
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
                                                                 val importance =
@@ -170,6 +172,7 @@ class NotifyService : Service() {
                                                             }
                                                         }.build()
 
+                                                //create live marker
                                                 val list = geocoder.getFromLocationName(json.get("addr") as String,1)
                                                 val lat = list[0].latitude
                                                 val lon = list[0].longitude
@@ -190,6 +193,7 @@ class NotifyService : Service() {
                                                     writeNewLive(idDB,json.get("name") as String,json.get("addr") as String,json.get("timer") as String,json.get("owner") as String,mark,"da implementare","da implementare","Pubblico","Live")
                                                 }
                                             }
+                                            // eliminate item from db
                                             db.collection("user").document(idDB)
                                                 .collection("live").document(child.id).delete()
                                         }
@@ -221,13 +225,12 @@ class NotifyService : Service() {
                                                 notification =
                                                     NotificationCompat.Builder(context, "first").apply {
                                                         setContentTitle("Richiesta d'amicizia")
-//                                                        setContentText(notificationJson.getString("origin") + ": Ti ha inviato una richiesta di amicizia!")
                                                         setContentText(chi.value as String + ": Ti ha inviato una richiesta di amicizia!")
-
                                                         setSmallIcon(R.drawable.ic_addfriend)
-                                                        setAutoCancel(true) //collegato a tap notification
+                                                        setAutoCancel(true)
 
 
+                                                        // on click intent
                                                             val notificationClickIntent: Intent =
                                                                 Intent(
                                                                     context,
@@ -236,7 +239,6 @@ class NotifyService : Service() {
                                                             notificationClickIntent.putExtra(
                                                                 "sender",
                                                                 chi.value as String
-//                                                            notificationJson.getString("origin")
                                                             )
                                                             notificationClickIntent.putExtra(
                                                                 "receiver",
@@ -253,12 +255,12 @@ class NotifyService : Service() {
 
                                                         priority = NotificationCompat.PRIORITY_DEFAULT
 
+                                                        // first button click intent
                                                         val acceptFriendIntent: Intent =
                                                             Intent(context, AcceptFriend::class.java)
                                                         acceptFriendIntent.putExtra(
                                                             "sender",
                                                             chi.value as String
-//                                                            notificationJson.getString("origin")
                                                         )
                                                         acceptFriendIntent.putExtra("receiver", idDB);
 
@@ -277,12 +279,12 @@ class NotifyService : Service() {
                                                             acceptPendingIntent
                                                         )
 
+                                                        // second button click intent
                                                         val declineFriendIntent: Intent =
                                                             Intent(context, DeclineFriend::class.java)
                                                         declineFriendIntent.putExtra(
                                                             "sender",
                                                             chi.value as String
-//                                                            notificationJson.getString("origin")
                                                         )
                                                         val declinePendingIntent =
                                                             PendingIntent.getBroadcast(
@@ -296,6 +298,7 @@ class NotifyService : Service() {
                                                             "Rifiuta",
                                                             declinePendingIntent
                                                         )
+                                                        // channel for android O
                                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                             val importance =
                                                                 NotificationManager.IMPORTANCE_HIGH
@@ -341,10 +344,10 @@ class NotifyService : Service() {
                                                             NotificationCompat.Builder(context, "first").apply {
                                                                 setContentTitle("Nuovo Amico!")
                                                                 setContentText(string)
-
                                                                 setSmallIcon(R.drawable.ic_accessibility)
                                                                 setAutoCancel(true) //collegato a tap notification
 
+                                                                // show friend on click notification
                                                                     val notificationClickIntent: Intent =
                                                                         Intent(
                                                                             context,
@@ -361,6 +364,7 @@ class NotifyService : Service() {
 
                                                                 priority = NotificationCompat.PRIORITY_DEFAULT
 
+                                                                // channel for android O
                                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                     val importance =
                                                                         NotificationManager.IMPORTANCE_HIGH
@@ -375,7 +379,7 @@ class NotifyService : Service() {
 
                                                             }.build()
                                                         nm.notify(notificationId, notification)
-//                                                    }
+                                                //delete item from db
                                                 db.collection("user").document(idDB)
                                                     .collection("addedfriend").document(child.id).delete()
                                                 }
@@ -412,6 +416,7 @@ class NotifyService : Service() {
                                                     json.get("owner") as String + json.get("name") as String
                                                 var name = json.get("name") as String
                                                 var owner = json.get("owner") as String
+                                                //check if car was eliminated before timer expired, in this case doesnt show notification
                                                 for (i in myCar.keys()) {
                                                     if (name == myCar.getJSONObject(i)
                                                             .get("name") as String
@@ -438,6 +443,7 @@ class NotifyService : Service() {
                                                             setSmallIcon(R.drawable.ic_car)
                                                             setAutoCancel(true) //collegato a tap notification
 
+                                                            // prepare intent for all action on notification
                                                             val notificationClickIntent: Intent =
                                                                 Intent(context, ShowCar::class.java)
                                                             notificationClickIntent.putExtra(
@@ -483,6 +489,7 @@ class NotifyService : Service() {
                                                                 acceptPendingIntent
                                                             )
 
+                                                            // set channel for android O
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                 val importance =
                                                                     NotificationManager.IMPORTANCE_HIGH
@@ -503,6 +510,7 @@ class NotifyService : Service() {
                                                 notificationJson.put(key, json)
                                             }
                                             }
+                                            //delete item from db
                                             db.collection("user").document(idDB)
                                                 .collection("timed").document(child.id).delete()
 
@@ -539,7 +547,7 @@ class NotifyService : Service() {
                                                 val name = json.get("name") as String
                                                 val owner = json.get("owner") as String
                                                 val address = json.get("addr") as String
-                                                //divide jsonNotify for each listner
+                                                //check if car was eliminated before timer expired, in this case doesnt show notification
                                                 for (i in myCar.keys()) {
                                                     if (name == myCar.getJSONObject(i)
                                                             .get("name") as String
@@ -564,7 +572,9 @@ class NotifyService : Service() {
                                                                 )
 
                                                                 setSmallIcon(R.drawable.ic_car)
-                                                                setAutoCancel(true) //collegato a tap notification
+                                                                setAutoCancel(true)
+
+                                                                // prepare intent for all action on notification
                                                                 setContentIntent(
                                                                     PendingIntent.getActivity(
                                                                         context,
@@ -593,9 +603,9 @@ class NotifyService : Service() {
                                                                     NotificationCompat.PRIORITY_DEFAULT
                                                                 val acceptReminderIntent: Intent =
                                                                     Intent(
-                                                                        context, /*ShowCar::class.java*/
+                                                                        context,
                                                                         RemindTimer::class.java
-                                                                    ) // change intent
+                                                                    )
                                                                 acceptReminderIntent.putExtra(
                                                                     "name",
                                                                     name
@@ -620,7 +630,7 @@ class NotifyService : Service() {
                                                                 )
                                                                 val deleteReminderIntent: Intent =
                                                                     Intent(
-                                                                        context, /*ShowCar::class.java*/
+                                                                        context,
                                                                         DeleteTimer::class.java
                                                                     ) // change intent
                                                                 deleteReminderIntent.putExtra(
@@ -650,6 +660,7 @@ class NotifyService : Service() {
                                                                     deletePendingIntent
                                                                 )
 
+                                                                // set channel for android O
                                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                     val importance =
                                                                         NotificationManager.IMPORTANCE_HIGH
@@ -670,6 +681,7 @@ class NotifyService : Service() {
                                                     notificationJson.put(key, json)
                                             }
                                             }
+                                            // delete item from db
                                             db.collection("user").document(idDB)
                                                 .collection("timedExpired").document(child.id).delete()
                                         }
@@ -722,6 +734,8 @@ class NotifyService : Service() {
 
                                                             priority =
                                                                 NotificationCompat.PRIORITY_DEFAULT
+
+                                                            // set channel for android O
                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                 val importance =
                                                                     NotificationManager.IMPORTANCE_HIGH
@@ -738,6 +752,8 @@ class NotifyService : Service() {
 
                                                         }.build()
                                                 nm.notify(notificationId, notification)
+
+                                                // found and delete marker from map
                                                 listAddr = geocoder.getFromLocationName(address, 1)
                                                 for (i in myLive.keys()){
                                                     if(myLive.getJSONObject(i).get("name") as String == name){
@@ -767,13 +783,9 @@ class NotifyService : Service() {
                                                     }
                                                 }
                                                 val list = geocoder.getFromLocationName(address,1)
-                                                val lat = list[0].latitude
-                                                val lon = list[0].longitude
-                                                val p0 = LatLng(lat,lon)
-                                                var done = false
-                                                var exp = (json.get("timer").toString().toInt() *60*1000).toLong()
-
                                             }
+
+                                            // delete item from db
                                             db.collection("user").document(idDB)
                                                 .collection("timedLiveExpired").document(child.id).delete()
                                         }
@@ -782,10 +794,8 @@ class NotifyService : Service() {
                         }
         }
             private fun createNotification(): Notification {
+                //set up foreground notification
                 notificationChannelId = "ENDLESS SERVICE CHANNEL"
-
-                // depending on the Android API that we're dealing with we will have
-                // to use a specific method to create the notification
                 notificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATED_IDENTITY_EQUALS")
+
 package com.example.maptry
 
 import android.annotation.SuppressLint
@@ -21,10 +23,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 class ShowFriendRequest : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
+
+    // show a layout to accept/decline friend request
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
-        //create connection
 
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val carLayout: FrameLayout = findViewById(R.id.car_layout)
@@ -40,8 +43,7 @@ class ShowFriendRequest : AppCompatActivity() {
         var extras = intent?.extras
         var sender = extras?.get("sender") as String
         var receiver = extras?.get("receiver") as String
-        println("SENDER IN ON CLICK")
-        println(sender)
+
         var buttonAccept:Button = findViewById(R.id.acceptFriendRequest)
         var friendTextView:TextView = findViewById(R.id.friendRequestText)
         friendTextView.text = sender + " ti ha inviato una richiesta di amicizia!"
@@ -49,8 +51,6 @@ class ShowFriendRequest : AppCompatActivity() {
         buttonAccept.setOnClickListener {
             confirmFriend(sender,receiver)
             switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout,liveLayout,loginLayout)
-            println("RUNNING")
-            println(isRunning)
             if(!isRunning) {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1
@@ -60,8 +60,6 @@ class ShowFriendRequest : AppCompatActivity() {
         }
         buttonDecline.setOnClickListener {
             switchFrame(homeLayout,drawerLayout,listLayout,friendLayout,listFriendLayout,splashLayout,carLayout,liveLayout,loginLayout)
-            println("RUNNING")
-            println(isRunning)
             if(!isRunning) {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1

@@ -9,7 +9,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import com.example.maptry.NotifyService.Companion.jsonNotifIdFriendRequest
 
-// accept friend request
 class AcceptFriend : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         var notificationManager :NotificationManager = context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager

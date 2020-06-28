@@ -42,6 +42,8 @@ var jsonNotifId = JSONObject()
 var notificationJson = JSONObject()
 var newFriendJson = JSONObject()
 
+
+// re draw all poi
 fun reDraw(){
     mMap.clear()
     var tmp = mymarker
@@ -75,6 +77,7 @@ fun reDraw(){
     mymarker.remove(oldPos?.position.toString())
 }
 
+// move Frame of actuvuty_maps layout
 fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout, toGone3: FrameLayout, toGone4: FrameLayout,toGone5: FrameLayout,toGone6: FrameLayout,toGone7: FrameLayout,toGone8: FrameLayout){
     toGone1.invalidate()
     toGone2.invalidate()
@@ -100,6 +103,7 @@ fun switchFrame(toView: FrameLayout, toGone1: FrameLayout, toGone2: FrameLayout,
     toView.bringToFront()
 }
 
+// simply create a marker, return it and add it to mymarker
 fun createMarker(p0: LatLng): Marker? {
 
     var background = object : Runnable {
@@ -137,6 +141,8 @@ fun createMarker(p0: LatLng): Marker? {
     mymarker.put(p0.toString(),x)
     return x
 }
+
+// show a dialog with infromation of friend's poi selected, can be add to user's poi
 fun showPOIPreferences(p0 : String,inflater:LayoutInflater,context:Context,mark:Marker){
 
     val dialogView: View = inflater.inflate(com.example.maptry.R.layout.dialog_custom_friend_poi, null)
@@ -162,10 +168,6 @@ fun showPOIPreferences(p0 : String,inflater:LayoutInflater,context:Context,mark:
         added = 1
         val cont = friendTempPoi.getJSONObject(p0.toString()).get("cont")
         mark.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-//        if (id != null) {
-//            writeNewPOI(id,friendTempPoi.getJSONObject(p0).get("name") as String,address.text.toString(),cont.toString(),friendTempPoi.getJSONObject(p0).get("type").toString(),mark,"da implementare","da implementare")
-//        }
-
         alertDialog.dismiss()
     }
     routebutton.setOnClickListener {

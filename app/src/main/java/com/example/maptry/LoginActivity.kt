@@ -212,6 +212,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        @Suppress("DEPRECATED_IDENTITY_EQUALS")
         if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
 
             onSaveInstanceState(newBundy)

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATED_IDENTITY_EQUALS")
+
 package com.example.maptry
 
 import android.annotation.SuppressLint
@@ -26,6 +28,7 @@ import java.net.URL
 import java.net.URLEncoder
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.maptry.MapsActivity.Companion.context
+import com.example.maptry.MapsActivity.Companion.ip
 import com.example.maptry.MapsActivity.Companion.isRunning
 import com.example.maptry.MapsActivity.Companion.zoom
 
@@ -37,7 +40,6 @@ class ShowFriendList : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
         //create connection
-        println("IN SHOW FRIEND LIST")
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
@@ -61,20 +63,7 @@ class ShowFriendList : AppCompatActivity() {
             finish()
 
         }
-
-        // Return a list of the tasks that are currently running,
-        // with the most recent being first and older ones after in order.
-        // Taken 1 inside getRunningTasks method means want to take only
-        // top activity from stack and forgot the olders.
-
-
-        // Return a list of the tasks that are currently running,
-        // with the most recent being first and older ones after in order.
-        // Taken 1 inside getRunningTasks method means want to take only
-        // top activity from stack and forgot the olders.
-
-
-        //finish()
+        showFriendinActivity()
     }
 
     fun showFriendinActivity(){
@@ -98,10 +87,8 @@ class ShowFriendList : AppCompatActivity() {
 
         var  lv: ListView = findViewById<ListView>(R.id.fv)
         val friendList = MutableList<String>(len,{""})
-        if(len == 0) txt.visibility = View.VISIBLE;
-        else txt.visibility = View.INVISIBLE;
-        println("PRINT FRIEND LIST")
-        println(MapsActivity.friendJson)
+        if(len == 0) txt.visibility = View.VISIBLE
+        else txt.visibility = View.INVISIBLE
         for (i in MapsActivity.friendJson.keys()){
             friendList[index] = MapsActivity.friendJson[i] as String
             index++
@@ -112,7 +99,6 @@ class ShowFriendList : AppCompatActivity() {
 
             val inflater: LayoutInflater = this.layoutInflater
             val dialogView: View = inflater.inflate(R.layout.dialog_custom_eliminate, null)
-            println("LONGCLICK")
             val eliminateBtn: Button = dialogView.findViewById(R.id.eliminateBtn)
             eliminateBtn.setOnClickListener {
 
@@ -133,7 +119,7 @@ class ShowFriendList : AppCompatActivity() {
                                 id?.let { it1 ->
                                     MapsActivity.friendJson.put(key,removed)
                                     confirmFriend(id,removed)
-                                    Toast.makeText(this,"undo" + selectedItem.toString(), Toast.LENGTH_LONG)
+                                    Toast.makeText(this,"undo" + selectedItem.toString(), Toast.LENGTH_LONG).show()
                                     showFriendinActivity()
 
                                 }
@@ -176,9 +162,7 @@ class ShowFriendList : AppCompatActivity() {
 
             var context = this
             txtName.text = selectedItem
-            println("CLICK")
-            //   var url = URL("http://192.168.1.80:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
-            var url = URL("http://192.168.1.138:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
+            var url = URL("http://"+ip+":3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(selectedItem, "UTF-8"))
             var result = JSONObject()
             val client = OkHttpClient()
             val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
@@ -207,10 +191,10 @@ class ShowFriendList : AppCompatActivity() {
                             alertDialog2.show()
                             result = JSONObject(response.body()?.string()!!)
                             val length = result.length()
-                            val markerList = MutableList<String>(length,{""})
-                            var index = 0
+                            val markerList = MutableList<String>(length+1,{""})
+                            var index = 1
+                            markerList[0] = ""
                             for(i in result.keys()){
-                                println(result.get(i))
                                 markerList[index] = result.getJSONObject(i).get("name") as String
                                 index++
                             }
@@ -221,7 +205,7 @@ class ShowFriendList : AppCompatActivity() {
                                 }
 
                                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                                    if(check == 1){
+                                    if(parent?.getItemAtPosition(position) as String != ""){
                                         var key = ""
                                         val selectedMarker =
                                             parent?.getItemAtPosition(position) as String
@@ -243,7 +227,7 @@ class ShowFriendList : AppCompatActivity() {
                                             lat,
                                             lon
                                         )
-                                        //                                // refactor create marker to not call getaddress
+
                                         var mark = createMarker(pos)
                                         MapsActivity.friendTempPoi.put(pos.toString(), result.getJSONObject(key))
                                         MapsActivity.mMap.moveCamera(
@@ -254,12 +238,17 @@ class ShowFriendList : AppCompatActivity() {
                                                 ), 20F
                                             )
                                         )
+
+                                        if(!isRunning) {
+                                            val main = Intent(context,MapsActivity::class.java)
+                                            zoom = 1
+                                            startActivity(main)
+
+                                        }
                                         switchFrame(homeLayout,friendLayout,listLayout,drawerLayout,friendRequestLayout,carLayout,splashLayout,liveLayout,loginLayout)
                                         alertDialog2.dismiss()
                                         showPOIPreferences(pos.toString(),inflater,context,mark!!)
-                                    }
-                                    else{
-                                        check = 1
+                                        finish()
                                     }
                                 }
 
@@ -270,29 +259,8 @@ class ShowFriendList : AppCompatActivity() {
                             e.printStackTrace()
                         }
                     })
-
-
-
-//                    val x:String = response.body()?.string()!!
-//                    response.body()!!.close()
-//
-//                    println(x)
-//                    result = JSONObject(x)
-//                    println(result)
-
                 }
-
             })
-
-
-
-//            println("CALLING SERVER")
-//            var json = getPoiFromFriend(selectedItem)
-//            println("SERVER RETURNEDDDDDDD")
-//            println(json)
-
-
-            //show friend
         }
         lv.adapter = arrayAdapter;
     }

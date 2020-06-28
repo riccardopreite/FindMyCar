@@ -42,6 +42,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.lang.Exception
 
+@Suppress("DEPRECATED_IDENTITY_EQUALS")
 @SuppressLint("Registered")
 class DeleteTimer : AppCompatActivity() {
     var name = ""
@@ -58,8 +59,8 @@ class DeleteTimer : AppCompatActivity() {
         name = extras.get("name") as String
 
         listAddr = geocoder.getFromLocationName(extras.get("address") as String, 1)
-        val location = (listAddr)?.get(0);
-        val p0 = location?.latitude?.let { LatLng(it, location.longitude) }
+        //val location = (listAddr)?.get(0);
+        //val p0 = location?.latitude?.let { LatLng(it, location.longitude) }
 
         for (i in myCar.keys()){
             if(myCar.getJSONObject(i).get("name") as String == name){

@@ -7,13 +7,12 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
-import com.example.maptry.MapsActivity
 import androidx.appcompat.app.AppCompatActivity
+import com.example.maptry.MapsActivity
 import com.example.maptry.MapsActivity.Companion.account
 import com.example.maptry.MapsActivity.Companion.alertDialog
 import com.example.maptry.MapsActivity.Companion.context
@@ -22,13 +21,9 @@ import com.example.maptry.MapsActivity.Companion.myCar
 import com.example.maptry.MapsActivity.Companion.newBundy
 import com.example.maptry.MapsActivity.Companion.zoom
 import com.example.maptry.NotifyService.Companion.jsonNotifIdRemind
-import com.google.android.material.snackbar.Snackbar
-import java.io.IOException
-import java.net.URL
-import java.net.URLEncoder
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
+
+
+@Suppress("DEPRECATED_IDENTITY_EQUALS")
 class RemindTimer : AppCompatActivity() {
     var name = ""
     var owner = ""
@@ -43,7 +38,6 @@ class RemindTimer : AppCompatActivity() {
 
         val close = findViewById<ImageView>(R.id.close_car)
         close.setOnClickListener {
-            println("HELLOOOOOOO")
             val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
             val listLayout: FrameLayout = findViewById(R.id.list_layout)
             val homeLayout: FrameLayout = findViewById(R.id.homeframe)
@@ -59,6 +53,7 @@ class RemindTimer : AppCompatActivity() {
         }
         val notificaionId = jsonNotifIdRemind.get(owner)
         notificationManager.cancel(notificaionId as Int);
+        // if activity is not Running start it, else show a popup to remind timer
         if(!isRunning) {
             val main = Intent(context,MapsActivity::class.java)
             zoom = 1
@@ -78,18 +73,15 @@ class RemindTimer : AppCompatActivity() {
         val timer : TimePicker = dialogView.findViewById(R.id.timePickerView)
         val remindButton : Button = dialogView.findViewById(R.id.remindButton)
         var key = ""
-        val id = account?.email?.replace("@gmail.com","")
-
 
         remindButton.setOnClickListener {
             myCar.getJSONObject(key).put("timer",timer.hour*60 + timer.minute)
-            println(myCar.getJSONObject(key))
             alertDialog.dismiss()
             resetTimerAuto(myCar.getJSONObject(key))
 
         }
         for (i in myCar.keys()){
-
+            // check the item to create the dialog
             if(myCar.getJSONObject(i).get("name") as String == name){
                 key = i
                 txtName.text = name
@@ -115,6 +107,7 @@ class RemindTimer : AppCompatActivity() {
                 }
 
                 alertDialog = dialogBuilder.create();
+                // need to be runned on UIThread
                 runOnUiThread(Runnable {
                     alertDialog.show()
                 })

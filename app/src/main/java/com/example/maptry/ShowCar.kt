@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATED_IDENTITY_EQUALS")
+
 package com.example.maptry
 //DO SAME THING OF SHOW FRIEND REQUEST FOR SHOW CAR AND RIMANDA
 import android.annotation.SuppressLint
@@ -27,10 +29,11 @@ class ShowCar : AppCompatActivity() {
     var name = ""
 
     @RequiresApi(Build.VERSION_CODES.O)
+    // this activity simply show car list
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
-        //create connection
+
         val extras = intent?.extras
         name = extras?.get("name") as String
         //refactor to car layout
@@ -53,7 +56,6 @@ class ShowCar : AppCompatActivity() {
                 val main = Intent(context,MapsActivity::class.java)
                 zoom = 1
                 startActivity(main)
-
             }
             finish()
         }
@@ -69,8 +71,6 @@ class ShowCar : AppCompatActivity() {
         var index = 0
         var indexFull = 0
         val txt: TextView = findViewById(R.id.nocar)
-        val inflater: LayoutInflater = this.layoutInflater
-        val id = account?.email?.replace("@gmail.com","")
 
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
@@ -87,14 +87,9 @@ class ShowCar : AppCompatActivity() {
         var  lv: ListView = findViewById<ListView>(R.id.lvCar)
         val carList = MutableList<String>(len,{""})
         val carListFull = MutableList<String>(len*10,{""})
-        if(len == 0) txt.visibility = View.VISIBLE;
-        else txt.visibility = View.INVISIBLE;
-        println("CAR LIST")
-        println(myCar)
-        println(myCar.length())
+        if(len == 0) txt.visibility = View.VISIBLE
+        else txt.visibility = View.INVISIBLE
         for (i in myCar.keys()){
-            println(i)
-            println(myCar.getJSONObject(i))
             carList[index] = myCar.getJSONObject(i).get("name") as String
             index++
             for (x in myCar.getJSONObject(i).keys()) {
@@ -118,8 +113,6 @@ class ShowCar : AppCompatActivity() {
                 println(lv.getItemAtPosition(pos))
                 println(lv.selectedView)
                 lv.setItemChecked(pos,true)
-               // lv.getChildAt(pos).setBackgroundResource(R.color.quantum_black_100)
-
                 break
             }
             pos++
@@ -131,7 +124,6 @@ class ShowCar : AppCompatActivity() {
 
             val inflater: LayoutInflater = this.layoutInflater
             val dialogView: View = inflater.inflate(R.layout.dialog_custom_eliminate, null)
-            println("LONGCLICK")
             val eliminateBtn: Button = dialogView.findViewById(R.id.eliminateBtn)
             eliminateBtn.setOnClickListener {
 
@@ -146,7 +138,7 @@ class ShowCar : AppCompatActivity() {
                         AC = "Annulla"
                         var text = "Rimosso "+selectedItem
                         var id = account?.email?.replace("@gmail.com","")
-                        val snackbar = Snackbar.make(view, text, 2000)
+                        val snackbar = Snackbar.make(view, text, 5000)
                             .setAction(AC,View.OnClickListener {
 
                                 id?.let { it1 ->
@@ -193,22 +185,15 @@ class ShowCar : AppCompatActivity() {
             var remindButton : Button = dialogView.findViewById(R.id.remindButton)
             var key = ""
             val selectedItem = parent.getItemAtPosition(position) as String
-
             var context = this
             txtName.text = selectedItem
             for (i in myCar.keys()){
-                println(i)
-                println(myCar.getJSONObject(i))
                 if(myCar.getJSONObject(i).get("name") as String == selectedItem){
                     key = i
-                    address.text = myCar.getJSONObject(i).get("address") as String
+                    address.text = myCar.getJSONObject(i).get("addr") as String
                     var time = (myCar.getJSONObject(i).get("timer").toString()).toInt()
                     var hour = time/60
                     var minute = time - hour*60
-                    println("timeee")
-                    println(time)
-                    println(hour)
-                    println(minute)
                     timer.setIs24HourView(true)
                     timer.hour = hour
                     timer.minute = minute
@@ -217,7 +202,6 @@ class ShowCar : AppCompatActivity() {
 
             remindButton.setOnClickListener {
                 myCar.getJSONObject(key).put("timer",timer.hour*60 + timer.minute)
-                println(myCar.getJSONObject(key))
                 alertDialog.dismiss()
                 resetTimerAuto(myCar.getJSONObject(key))
 
@@ -231,9 +215,6 @@ class ShowCar : AppCompatActivity() {
 
             alertDialog = dialogBuilder.create();
             alertDialog.show()
-
-
-            //show friend
         }
 
     }

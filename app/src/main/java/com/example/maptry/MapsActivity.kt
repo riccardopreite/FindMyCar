@@ -64,7 +64,9 @@ import java.net.URLEncoder
 import java.util.*
 import java.util.Arrays.asList
 
-@Suppress("DEPRECATION")
+@Suppress("DEPRECATION", "DEPRECATED_IDENTITY_EQUALS",
+    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+)
 class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
     GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,NavigationView.OnNavigationItemSelectedListener{
 
@@ -289,8 +291,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
                 result.addOnCompleteListener { task ->
                     try {
-                        val response: LocationSettingsResponse? =
-                            task.getResult(ApiException::class.java)
+                        //val response: LocationSettingsResponse? =task.getResult(ApiException::class.java)
                         // All location settings are satisfied. The client can initialize location
                         // requests here.
                     } catch (exception: ApiException) {
@@ -956,7 +957,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                                     myList.put(mark.position.toString(),removed)
                                     mymarker.put(mark.position.toString(),mark)
                                     writeNewPOI(it1,removed.get("name").toString(),removed.get("addr").toString(),removed.get("cont").toString(),removed.get("type").toString(),mark,"da implementare","da implementare")
-                                    Toast.makeText(this,"undo" + selectedItem.toString(),Toast.LENGTH_LONG)
+                                    Toast.makeText(this,"undo" + selectedItem.toString(),Toast.LENGTH_LONG).show()
 
                                     showPOI()
                                 }
@@ -1053,9 +1054,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         val len = friendJson.length()
         var index = 0
         val txt: TextView = findViewById(R.id.nofriend)
-        val inflater: LayoutInflater = this.layoutInflater
-        val id = account?.email?.replace("@gmail.com","")
-
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
@@ -1200,7 +1198,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                                     if(parent?.getItemAtPosition(position) as String != "") {
                                         var key = ""
                                         val selectedMarker =
-                                            parent?.getItemAtPosition(position) as String
+                                            parent.getItemAtPosition(position) as String
                                         var lat = 0.0
                                         var lon = 0.0
                                         for (i in result.keys()) {
@@ -1223,8 +1221,6 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
                                         alertDialog2.dismiss()
                                         showPOIPreferences(pos.toString(),inflater,context,mark!!)
                                     }
-                                    else{
-                                    }
                                 }
                             }
                             spinner.adapter = arrayAdapter2;
@@ -1244,8 +1240,7 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
         var index = 0
         var indexFull = 0
         val txt: TextView = findViewById(R.id.nocar)
-        val inflater: LayoutInflater = this.layoutInflater
-        val id = account?.email?.replace("@gmail.com","")
+
 
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)

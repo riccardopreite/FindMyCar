@@ -19,6 +19,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 
 
+
+//created to start service at boot time but cause problem with context and activity
 class Start : BroadcastReceiver() {
 
     lateinit var mGoogleSignInClient: GoogleSignInClient

@@ -48,10 +48,9 @@ fun reminderAuto(car:JSONObject){
     })
 }
 
-fun getPoiFromFriend(friend:String):JSONObject{
+/*fun getPoiFromFriend(friend:String):JSONObject{
     println("IN GET POI")
     var url = URL("http://"+ip+":3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(friend, "UTF-8"))
-    //var url = URL("http://192.168.43.76:3000/getPoiFromFriend?"+ URLEncoder.encode("friend", "UTF-8") + "=" + URLEncoder.encode(friend, "UTF-8"))
     var result = JSONObject()
     val client = OkHttpClient()
     val request = Request.Builder()
@@ -70,7 +69,7 @@ fun getPoiFromFriend(friend:String):JSONObject{
         }
     })
     return result
-}
+}*/
 
 fun confirmFriend(sender:String,receiver:String){
     var url = URL("http://"+ip+":3000/confirmFriend?"+ URLEncoder.encode("receiver", "UTF-8") + "=" + URLEncoder.encode(receiver, "UTF-8")+"&"+ URLEncoder.encode("sender", "UTF-8") + "=" + URLEncoder.encode(sender, "UTF-8"))

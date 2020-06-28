@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATED_IDENTITY_EQUALS")
+
 package com.example.maptry
 
 import android.content.Intent
@@ -37,6 +39,8 @@ class ShowLiveEvent: AppCompatActivity() {
     var owner = ""
     var timer = ""
     var address = ""
+
+    // move camera on live event
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -55,54 +59,6 @@ class ShowLiveEvent: AppCompatActivity() {
                 p0, 20F
             )
         )
-        var done = false
-        var exp = (timer.toInt() *60*1000).toLong()
-
-        /*runOnUiThread {
-            val mainHandler = Handler(Looper.getMainLooper())
-            mainHandler.postDelayed(object : Runnable {
-                override fun run() {
-                    if(!done) {
-                        val mark = mymarker[p0.toString()] as Marker
-                        val id = account?.email?.replace("@gmail.com","")
-                        mymarker.remove(p0.toString())
-                        mark.remove()
-                        val selectedItem = myLive.getJSONObject(p0.toString()).get("name")
-                        myList.remove(p0.toString())
-                        myLive.remove(p0.toString())
-                        done = true
-                        id?.let { it1 -> db.collection("user").document(it1).collection("marker").get()
-                            .addOnSuccessListener { result ->
-                                for (document in result) {
-                                    val name = document.data["name"]
-                                    if(name == selectedItem)  {
-                                        db.document("user/"+id+"/marker/"+document.id).delete()
-                                    }
-                                }
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.d("FAIL", "Error getting documents: ", exception)
-                            }
-                        }
-                        id?.let { it1 -> db.collection("user").document(it1).collection("live").get()
-                            .addOnSuccessListener { result ->
-                                for (document in result) {
-                                    val name = document.data["name"]
-                                    if(name == selectedItem)  {
-                                        db.document("user/"+id+"/live/"+document.id).delete()
-                                    }
-                                }
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.d("FAIL", "Error getting documents: ", exception)
-                            }
-                        }
-
-                    }
-                    else mainHandler.postDelayed(this, exp)
-                }
-            },exp)
-        }*/
         val drawerLayout: FrameLayout = findViewById(R.id.drawer_layout)
         val listLayout: FrameLayout = findViewById(R.id.list_layout)
         val homeLayout: FrameLayout = findViewById(R.id.homeframe)
