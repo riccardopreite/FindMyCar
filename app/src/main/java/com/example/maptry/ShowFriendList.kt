@@ -50,6 +50,27 @@ class ShowFriendList : AppCompatActivity() {
         var closeDrawer :ImageView = findViewById(R.id.close_listfriend)
         val liveLayout: FrameLayout = findViewById(R.id.live_layout)
         val loginLayout: FrameLayout = findViewById(R.id.login_layout)
+        val addfriend: ImageView = findViewById(R.id.add_listfriend)
+        addfriend.setOnClickListener {
+            val inflater: LayoutInflater = this.layoutInflater
+            val dialogView: View = inflater.inflate(R.layout.add_friend, null)
+            val emailText : EditText = dialogView.findViewById(R.id.friendEmail)
+            val addBtn: Button = dialogView.findViewById(R.id.friendBtn)
+            val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(this)
+            dialogBuilder.setOnDismissListener(object : DialogInterface.OnDismissListener {
+                override fun onDismiss(arg0: DialogInterface) { }
+            })
+            dialogBuilder.setView(dialogView)
+            MapsActivity.alertDialog = dialogBuilder.create();
+            MapsActivity.alertDialog.show()
+
+            addBtn.setOnClickListener {
+                if(emailText.text.toString() !="" && emailText.text.toString() != "Inserisci Email" && emailText.text.toString() != MapsActivity.account?.email && emailText.text.toString() != MapsActivity.account?.email?.replace("@gmail.com","")){
+                    MapsActivity.account?.email?.replace("@gmail.com","")?.let { it1 ->sendFriendRequest(emailText.text.toString(),it1)}
+                    MapsActivity.alertDialog.dismiss()
+                }
+            }
+        }
         switchFrame(listFriendLayout,homeLayout,drawerLayout,listLayout,splashLayout,friendLayout,carLayout,liveLayout,loginLayout)
 
         closeDrawer.setOnClickListener {
