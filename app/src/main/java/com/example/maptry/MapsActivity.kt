@@ -291,13 +291,10 @@ class MapsActivity  : AppCompatActivity(), OnMapReadyCallback,
 
                 result.addOnCompleteListener { task ->
                     try {
-                        //val response: LocationSettingsResponse? =task.getResult(ApiException::class.java)
-                        // All location settings are satisfied. The client can initialize location
-                        // requests here.
+                        val response: LocationSettingsResponse? =task.getResult(ApiException::class.java)
                     } catch (exception: ApiException) {
                         when (exception.getStatusCode()) {
                             LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->                             // Location settings are not satisfied. But could be fixed by showing the
-                                // user a dialog.
                                 try {
                                     // Cast to a resolvable exception.
                                     val resolvable: ResolvableApiException =
